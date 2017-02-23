@@ -1,7 +1,7 @@
 import checkIn_object
 import user_object
 from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
-from constants import e_t0, init_pro, add_pro, rp
+from constants import e_t0, init_pro, add_pro, rp, e_r0
 import graph_object
 from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion
 import random
@@ -81,7 +81,32 @@ def physical_check(checkIn_entry , influenced, ind):
             if random_num >= rec_prob:
                 return True
 	return False
-
+    
+def get_initial_users(event_lon, event_lat, start_time, end_time):
+    users_set = set()
+    for checkIn_entry in checkIn_list:
+        user_id = checkIn_entry[0]
+        if user_id in users_set:
+            continue
+        if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            if insideRegion(event_lon, even_lat, rp, checkIn_entry[3], checkIn_entry[2]):
+                users_set.add(checkIn_entry[0])
+    users_set = list(users_set)
+    users_set.sort()
+    return users_set
+    
+def initial_propogation(event_lon, event_lat, start_time, end_time):
+    global eventType
+    users_region_list = get_initial_users(event_lon, event_lat, start_time, end_time)
+    for user_id in users_region_list:
+        timeInRegion = stayTimeInRegion(event_lon, event_lat, e_r0, e_t0, init_pro, user_id)
+        inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
+        random_num = random.random() # between 0 to 1
+        if random_num >= inf_prob:
+            user_list[user_id]['influenced_bit'] = 1
+            user_list[user_id]['time_of_influence'] = checkIn_entry[1]
+            influenced_list.append(user_id)
+    
 def check(checkIn_entry, ind):
 	global eventType
     global influenced_list
@@ -113,7 +138,7 @@ def traverse():
 				return 1
         ind = ind + 1
 	return None
-
+    
 new_influenced = traverse()
 while new_influenced!=None:
 	new_influenced = traverse()

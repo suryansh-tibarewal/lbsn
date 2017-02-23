@@ -117,7 +117,8 @@ for v in ini:
 	if rand <= p:
 		influenced.append(v)
 	
-#influence propagation in OSN
+#influence propagation in 
+
 sharing = []
 for v in influenced:
 	p = osn_share_prob(E.type, v.interest)

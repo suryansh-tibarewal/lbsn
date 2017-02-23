@@ -81,13 +81,13 @@ def phy_inf_prob(eventType, userInterest, isFriend):
 def arePhysicalWorldNeighbors(ux, uy, vx, vy):
 	global propRad
 	ans = False
-	if euclideanDist(ux, uy, vx, vy) <= propRad
+	if euclideanDist(ux, uy, vx, vy) <= propRad:
 		ans = True
 	return ans
 
 def insideRegion(xCen, yCen, r, x, y):
 	ans = False
-	if pow(x - xCen, 2) + pow(y - yCen, 2) <= pow(r, 2)
+	if pow(x - xCen, 2) + pow(y - yCen, 2) <= pow(r, 2):
 		ans = True
 	return ans
 
@@ -97,36 +97,8 @@ def nodesInsideRegion(xCen, yCen, r):
 		if insideRegion(xCen, yCen, r, vx, vy):
 			res.append(v)
 	return res
-
-def stayTimeinRegion(xCen, yCen, r):
-	global init_pro
-	r = range(0, 1, jump)
-	for t in r:
-		
 	
 	
-#####################################################################
-
-#initial influence propagation
-ini = nodesInsideRegion()
-influenced = []
-for v in ini:
-	T = stayTimeinRegion(E.x0, E.y0, E.r0)
-	p = init_inf_prob(E.type, v.interest, T)
-	rand = random()
-	if rand <= p:
-		influenced.append(v)
-	
-#influence propagation in OSN
-sharing = []
-for v in influenced:
-	p = osn_share_prob(E.type, v.interest)
-	rand = random()
-	if rand <= p:
-		sharing.append(v)
-
-for v in sharing:
-	
-			
+####################################################################
 	
 	

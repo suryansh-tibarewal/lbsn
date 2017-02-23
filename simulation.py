@@ -1,24 +1,18 @@
 import checkIn_object
 import user_object
 from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
-from constants import e_t0, init_pro, add_pro
+from constants import e_t0, init_pro, add_pro, rp
 import graph_object
-from maths import osn_share_prob, osn_inf_prob, pw_share_prob
+from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion
 import random
-######################		CONSTANTS		##############
 
 eventType = 'Puppetry'
 
 checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
 user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, init_pro, add_pro)
 n_users = len(user_list)
-i_list = [0]
+influenced_list = [0]
 graph_object.initialize(BRIGHTKITE_DATASET)
-
-
-######################		FUNCTIONS		######################
-def getKey(item):
-    return item[0]
 
 def social_check(checkIn_entry , influenced):
     global eventType
@@ -47,11 +41,28 @@ def offline_edge(user_id_sender, checkIn_entry, ind):
     receiver_lon = checkIn_entry[3]
     low_time = buffer_fun(receiver_time, 0)
     high_time = buffer_fun(receiver_time, 1)
+    ind_val = ind
     while True:
         ind = ind - 1
         if ind<0 or low_time>checkIn_list[ind][1]:
             break
-        if checkIn_list[ind][0] == user_id_sender 
+        if checkIn_list[ind][0] == user_id_sender:
+            sender_lat = checkIn_list[ind][2]
+            sender_lon = checkIn_list[ind][3]
+            if insideRegion(sender_lon, sender_lat, rp, receiver_lon, receiver_lat):
+                return ind
+    ind = ind_val
+    ind_high = len(checkIn_list)
+    while True:
+        ind = ind + 1
+        if ind>=ind_high or high_time<checkIn_list[ind][1]:
+            break
+        if checkIn_list[ind][0] == user_id_sender:
+            sender_lat = checkIn_list[ind][2]
+            sender_lon = checkIn_list[ind][3]
+            if insideRegion(sender_lon, sender_lat, rp, receiver_lon, receiver_lat):
+                return ind
+    return -1
     
 def physical_check(checkIn_entry , influenced, ind):
     global eventType
@@ -61,60 +72,51 @@ def physical_check(checkIn_entry , influenced, ind):
     for user_id_sender in influenced:
         if not user_list[user_id_sender]['offline_shared']:
             continue
-        if(offline_edge(user_id_sender, checkIn_entry, ind)):
-	return True
+        ind_s = offline_edge(user_id_sender, checkIn_entry, ind)
+        if ind_s != -1:
+            validTimeCheck() #check through share time list
+            isOnlineFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)
+            rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isOnlineFriend)
+            random_num = random.random()
+            if random_num >= rec_prob:
+                return True
+	return False
 
 def check(checkIn_entry, ind):
 	global eventType
+    global influenced_list
     user_id = checkIn_entry[0]
-    res = 0
-	for influenced in i_list:
-		res = (social_check(checkIn_entry , influenced) or physical_check(checkIn_entry , influenced, ind))
-		if res:
-            online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
-            random_num = random.random() # between 0 to 1
-            if random_num >= online_share_prob:
-                user_list[user_id]['online_shared'] = 1
-			offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
-            random_num = random.random()
-            if random_num >= offline_share_prob:
-                user_list[user_id]['offline_shared'] = 1
-            return 1
+    influenced_bool = (social_check(checkIn_entry, influenced_list) or physical_check(checkIn_entry, influenced_list, ind))
+    if influenced_bool:
+        online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+        random_num = random.random() # between 0 to 1
+        if random_num >= online_share_prob:
+            user_list[user_id]['online_shared'] = 1
+        offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+        random_num = random.random()
+        if random_num >= offline_share_prob:
+            user_list[user_id]['offline_shared'] = 1
+        return 1
 	return 0
 
 def traverse():
-	val = []
     ind = 0
-	for e in checkin_list:
-		if ( e[3]==0 and influenced_bits[e[1]]==0 ):
-			print(e[1],':',e[0])
-			if check(e, ind):
-				val = e
-				influenced_bits[e[1]]=1
-				Ti[e[1]] = e[0]
-				i_list.append(e[1])
-				e[3]=1
-				#print(val)
-				return val
+	for checkIn_entry in checkin_list:
+        user_id = checkIn_entry[0]
+        validity_status = checkIn_entry[5]
+		if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
+			if check(checkIn_entry, ind):
+                user_list[user_id]['influenced_bit'] = 1
+                user_list[user_id]['time_of_influence'] = checkIn_entry[1]
+                checkIn_entry[5] = 1
+				influenced_list.append(user_id)
+				return 1
         ind = ind + 1
 	return None
 
-######################		EXE		#######################
-
-#checkin_list.sort()
-#print(checkin_list)
-
-for i in range(0,n_users):
-	influenced_bits.append(0)
-
 new_influenced = traverse()
-
 while new_influenced!=None:
 	new_influenced = traverse()
 
-for i in i_list:
-	print(str(i) , ':' , Ti[i])
-
-
-
-
+for influenced_user in influenced_list:
+	print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

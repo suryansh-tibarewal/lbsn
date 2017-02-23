@@ -80,7 +80,7 @@ def physical_check(checkIn_entry , influenced, ind):
             random_num = random.random()
             if random_num >= rec_prob:
                 return True
-	return False
+    return False
     
 def get_initial_users(event_lon, event_lat, start_time, end_time):
     users_set = set()
@@ -108,7 +108,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             influenced_list.append(user_id)
     
 def check(checkIn_entry, ind):
-	global eventType
+    global eventType
     global influenced_list
     user_id = checkIn_entry[0]
     influenced_bool = (social_check(checkIn_entry, influenced_list) or physical_check(checkIn_entry, influenced_list, ind))
@@ -122,26 +122,26 @@ def check(checkIn_entry, ind):
         if random_num >= offline_share_prob:
             user_list[user_id]['offline_shared'] = 1
         return 1
-	return 0
+    return 0
 
 def traverse():
     ind = 0
-	for checkIn_entry in checkin_list:
+    for checkIn_entry in checkin_list:
         user_id = checkIn_entry[0]
         validity_status = checkIn_entry[5]
-		if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
-			if check(checkIn_entry, ind):
+        if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
+            if check(checkIn_entry, ind):
                 user_list[user_id]['influenced_bit'] = 1
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
-				influenced_list.append(user_id)
-				return 1
+                influenced_list.append(user_id)
+                return 1
         ind = ind + 1
-	return None
+    return None
     
 new_influenced = traverse()
 while new_influenced!=None:
-	new_influenced = traverse()
+    new_influenced = traverse()
 
 for influenced_user in influenced_list:
-	print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])
+    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

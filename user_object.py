@@ -2,7 +2,7 @@ from random import choice
 import random
 from collections import defaultdict
 
-#user[id]['interests_list'']
+#user[id]['interests_list']
 #user[id]['physical_share_time_list']
 #user[id]['influenced_bit']
 #user[id]['time_of_influence']
@@ -62,4 +62,6 @@ def main(dataset_type, event_time, init_pro, add_pro):
         user_object_list[user]['influenced_bit'] = 0
         user_object_list[user]['time_of_influence'] = -1
         user_object_list[user]['physical_share_time_list'] = generateTimeList(event_time, init_pro, add_pro)
+        user_object_list[user]['online_shared'] = 0
+        user_object_list[user]['offline_shared'] = 0
     return user_object_list     

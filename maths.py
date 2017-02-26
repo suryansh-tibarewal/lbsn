@@ -28,7 +28,10 @@ def influence(x, iMax):
     return inf
 
 def jaccardCoeff(a, b):
-    coeff = len(set(a) & set(b))/len(set(a) | set(b))
+    if type(a) is str:    
+        l = [a] #make it a list
+    coeff = float(len(set(l) & set(b)))/float(len(set(l) | set(b)))
+    print a, b, coeff
     return coeff
 
 def interestMatchInf(eventType, userInterest):

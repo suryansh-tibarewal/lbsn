@@ -32,3 +32,8 @@ def checkUnDirectedEdge(from_vertex, to_vertex):
         return True
     else:
         return False
+
+def getFriends(user_id):
+    global graph_object_list
+    if user_id in graph_object_list:
+        return graph_object_list[user_id]    

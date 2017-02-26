@@ -1,4 +1,3 @@
-import gensim
 import numpy as np
 
 def getInterestList(fileName):
@@ -11,10 +10,12 @@ def getInterestList(fileName):
         interests_list.append(interest)
     #print interests_list
     f.close()
+    #print interests_list
     interests_list.sort()
     return interests_list
 
 def main():
+    import gensim
     model = gensim.models.Word2Vec.load_word2vec_format('word2vec_models/GoogleNews-vectors-negative300.bin', binary=True)
     interestList = getInterestList('interests_list.txt')
     print len(interestList)
@@ -23,7 +24,10 @@ def main():
     matrix = np.zeros(dimensions)
     for i in range(len(interestList)):
         for j in range(len(interestList)):
-            matrix[i, j] = model.similarity(interestList[i], interestList[j])
+            val = model.similarity(interestList[i], interestList[j])
+            if val<0:
+                val = 0
+            matrix[i, j] = val 
     print type(matrix)
     print matrix.shape 
 

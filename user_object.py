@@ -16,6 +16,7 @@ def getUserInterestsList():
         flag = True
         while flag:
             userInterest = choice(interestList).strip()
+            userInterest = userInterest.replace(" ", "_")
             if userInterest not in userInterestSet:
                 flag = False
         userInterestSet.add(userInterest)
@@ -43,7 +44,7 @@ def generateTimeList(event_time, init_pro, add_pro):
 
 def main(dataset_type, event_time, init_pro, add_pro):  
     user_object_list = defaultdict(dict)
-    f = open('interest.txt', 'r')
+    f = open('interests_list.txt', 'r')
     global interestList
     interestList = f.read().split(',')
     f.close()

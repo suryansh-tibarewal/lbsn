@@ -1,5 +1,5 @@
 import numpy as np
-from similairtyMatrixGenerator import getInterestList
+from similarityMatrixGenerator import getInterestList
 from math import sqrt
 
 def getSimilarityMatrix(fileName):
@@ -49,13 +49,10 @@ def soft_cosine(v1, v2, s):
     res = num/(den1*den2)
     return res
 
-#matrix = getSimilarityMatrix('similarityMatrix.txt')
-#print matrix
-#interestList = getInterestList('interests_list.txt')
-#print interestList
-#X = vectorize(['Puppetry', 'Pottery'], interestList)
-#print X
-#Y = vectorize(['Art', 'Aquariums'], interestList)
-#print Y
-
-#print 'sc = ', soft_cosine(X, Y, matrix)
+matrix = getSimilarityMatrix('similarityMatrix.txt')
+interestList = getInterestList('interests_list.txt')    
+def get_soft_cosine(v1, v2):
+    global matrix, interestList
+    X = vectorize(v1, interestList)
+    Y = vectorize(v2, interestList)
+    return soft_cosine(X, Y, matrix)

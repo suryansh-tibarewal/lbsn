@@ -1,5 +1,6 @@
 from math import sqrt
 from random import random
+from similarity import get_soft_cosine
 
 iMax1 = 3
 iMax2 = 1.5
@@ -9,11 +10,11 @@ c = 5
 init_pro = 0.02
 maxDescriptionCount = 10
 
-p1 = 0.5
-p2 = 0.5
-p3 = 0.5 
-p4 = 0.5
-p5 = 0.5
+p1 = 0.20
+p2 = 0.20
+p3 = 0.20
+p4 = 0.20
+p5 = 0.20
 
 propRad = 0.01
 
@@ -28,16 +29,15 @@ def influence(x, iMax):
     return inf
 
 def jaccardCoeff(a, b):
-    if type(a) is str:    
-        l = [a] #make it a list
-    coeff = float(len(set(l) & set(b)))/float(len(set(l) | set(b)))
-    print a, b, coeff
+    coeff = len(set(a) & set(b))/len(set(a) | set(b))
     return coeff
 
 def interestMatchInf(eventType, userInterest):
     global iMax1
-    jaccCoeff = jaccardCoeff(eventType, userInterest)
-    i1 = influence(jaccCoeff, iMax1)
+    #jaccCoeff = jaccardCoeff(eventType, userInterest)
+    softCoeff = get_soft_cosine(eventType, userInterest)
+    #print softCoeff
+    i1 = influence(softCoeff, iMax1)
     return i1
 
 def regionStayInf(stayTime):

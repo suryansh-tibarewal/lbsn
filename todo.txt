@@ -1,0 +1,6 @@
+# fun(location, radius, time) stay time in region
+# online graph func(userid1, userid2) edge or not
+# checkIn list, + status bit
+# user object with four params, function which generates random time for given event, init_pro, add_pro
+# x value seconds, tell equivalent normalized duration
+# number of users count

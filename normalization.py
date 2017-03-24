@@ -18,23 +18,6 @@ def normalize(ele_list):
     print normalized_list[:10]
     return normalized_list
     
-def getNormalizedDuration(durationInSeconds):
-	f = open('Brightkite_filter_dataset.txt', 'r')
-	maxCheckin = -1
-	minCheckin = 99999999999999999999999999999
-
-	for entry in f:
-		entryList = entry.split()
-		timeStamp = convertToTimestamp(entryList[1].strip())
-		if timeStamp > maxCheckin:
-			maxCheckin = timeStamp
-		if timeStamp < minCheckin:
-			minCheckin = timeStamp
-	f.close()
-
-	return float(durationInSeconds)/(maxCheckin - minCheckin)
-		
-
 f = open('Brightkite_filter_dataset.txt', 'r')
 lat_list = list()
 lon_list = list()

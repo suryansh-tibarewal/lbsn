@@ -204,7 +204,7 @@ def traverse():
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
                 influenced_list.append(user_id)
-                #print user_id, checkIn_entry[1]
+                print user_id, checkIn_entry[1]
         ind = ind + 1
 
 def filter_checkInList(start_time, end_time):
@@ -245,7 +245,7 @@ def F(pos):
         #print "indexes"
         #print start_ind, end_ind
         #print end_ind - start_ind
-        #time.sleep(10)
+        #time.sleep(10)         
         checkIn_list = checkIn_list[start_ind: end_ind + 1]
         traverse()
     print len(influenced_list)

@@ -1,23 +1,7 @@
 from math import sqrt
 from random import random
 from similarity import get_soft_cosine
-
-iMax1 = 3
-iMax2 = 1.5
-iMax3 = 6
-c = 5
-
-init_pro = 0.02
-maxDescriptionCount = 10
-
-p1 = 0.20
-p2 = p1 * 1.5
-p3 = p2
-p4 = p2
-p5 = p2
-
-propRad = 0.01
-
+from constants import *
 
 def eucledianDist(ux, uy, vx, vy):
     dist = sqrt(pow(vx - ux, 2) + pow(vy - uy, 2))
@@ -116,4 +100,3 @@ def nodesInsideRegion(xCen, yCen, r):
         if insideRegion(xCen, yCen, r, vx, vy):
             res.append(v)
     return res
-    

@@ -1,7 +1,6 @@
 import checkIn_object
 import user_object
-from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
-from constants import e_t0, init_pro, add_pro, rp, e_r0, buffer_time
+from constants import *
 import graph_object
 from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion, init_inf_prob
 import random
@@ -25,7 +24,7 @@ def social_check(checkIn_entry , influenced):
     for user_id_sender in influenced:
         if not user_list[user_id_sender]['online_shared']:
             continue
-        if(graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)):    
+        if(graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)):
             time_of_influence_sender = user_list[user_id_sender]['time_of_influence']
             if (time_of_influence_sender <= checkIn_time): # less than or less than equal to?
                     description_count = description_count + 1
@@ -66,7 +65,7 @@ def offline_edge(user_id_sender, checkIn_entry, ind):
             if insideRegion(sender_lon, sender_lat, rp, receiver_lon, receiver_lat):
                 return ind
     return -1
-    
+
 def physical_check(checkIn_entry , influenced, ind):
     global eventType
     global user_list
@@ -86,7 +85,7 @@ def physical_check(checkIn_entry , influenced, ind):
             if random_num <= rec_prob:
                 return True
     return False
-    
+
 def get_initial_users(event_lon, event_lat, start_time, end_time):
     global checkIn_list
     users_set = set()
@@ -100,7 +99,7 @@ def get_initial_users(event_lon, event_lat, start_time, end_time):
     users_set = list(users_set)
     users_set.sort()
     return users_set
-    
+
 def initial_propogation(event_lon, event_lat, start_time, end_time):
     global eventType
     global influenced_list
@@ -117,7 +116,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         if random_num <= inf_prob:
             #print "influenced", random_num
             user_list[user_id]['influenced_bit'] = 1
-            user_list[user_id]['time_of_influence'] = end_time 
+            user_list[user_id]['time_of_influence'] = end_time
             influenced_list.append(user_id)
             #print user_id, end_time
             online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
@@ -163,20 +162,20 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
         if insideRegion(xCen, yCen, r, timeList[i][3], timeList[i][2]):
             #print "hello"
             if initial == -1:
-                initial = timeList[i][1]            
+                initial = timeList[i][1]
             if i == len(timeList) - 1:
-                total += E_t0 + init_pro - initial                  
+                total += E_t0 + init_pro - initial
         elif initial!=-1:
             total += timeList[i][1] - initial
             initial = -1
     return total
-            
+
 def check(checkIn_entry, ind):
     global eventType
     global influenced_list
     global user_list
     user_id = checkIn_entry[0]
-    influenced_bool = (social_check(checkIn_entry, influenced_list) or physical_check(checkIn_entry, influenced_list, ind))
+    influenced_bool = ((osn_on and social_check(checkIn_entry, influenced_list)) or (pw_on and physical_check(checkIn_entry, influenced_list, ind)))
     if influenced_bool:
         online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
         random_num = random.random() # between 0 to 1
@@ -223,7 +222,7 @@ def filter_checkInList(start_time, end_time):
         else :
             if flag == True:
                 end_ind = ind
-                break        
+                break
         ind = ind+1
     if flag==True:
         if end_ind < start_ind:
@@ -231,13 +230,14 @@ def filter_checkInList(start_time, end_time):
         return start_ind, end_ind
     else :
         return 0, 0
-    
+
 def F(pos):
     #print "hello"
     global influenced_list
     global checkIn_list
     influenced_list = list()
-    new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+init_pro)
+    if init_on:
+        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+init_pro)
     #print influenced_list
     if new_influenced!=None:
         print len(influenced_list)
@@ -251,6 +251,6 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-F((0.09916773323165684, 0.3422742228921536))    
+##F((0.09916773323165684, 0.3422742228921536))
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

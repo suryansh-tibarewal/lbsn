@@ -56,7 +56,5 @@ def usersInRegion(x,y,r,t):
             if( eucledianDist(u_loc[0],u_loc[1],v_loc[0],v_loc[1]) <= r):
                 ans.append(user)
     return ans
-
-initialize(BRIGHTKITE_DATASET)
 #print get_pos(0,.56065)
 #print neg(0,0.600)

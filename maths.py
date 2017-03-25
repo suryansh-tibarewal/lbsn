@@ -8,6 +8,7 @@ def eucledianDist(ux, uy, vx, vy):
     return dist
 
 def influence(x, iMax):
+    #print x, iMax
     inf = (iMax - 1)*sqrt(1 - pow(1 - x, 2)) + 1
     #print "inf", inf
     return inf

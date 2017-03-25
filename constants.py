@@ -5,6 +5,7 @@ init_on = True
 osn_on = True
 pw_on = True
 
+
 iMax1 = 3
 iMax2 = 1.5
 iMax3 = 6
@@ -28,7 +29,7 @@ p5 = 1.5*p
 
 rp = 0.01
 
-buffer_time = 0.0001
+buffer_time = 0.000000001
 
 def recalculateProbs():
     global p1, p2, p3, p4, p5
@@ -51,6 +52,12 @@ def setInitPro(value):
     global init_pro
     init_pro = value
 
+def getSwitchStatus():
+    global init_on, osn_on, pw_on
+    res = []
+    res.extend([init_on, osn_on, pw_on])
+    return res
+
 def setAddPro(value):
     global add_pro
     add_pro = value
@@ -64,15 +71,23 @@ def switchInitOn(boolVal):
     init_on = boolVal
 
 def switchOsnOn(boolVal):
-    print boolVal
+    #print boolVal
     global osn_on
+    print "bool", boolVal
     osn_on = boolVal
+    print "tud", osn_on
 
 def switchPwOn(boolVal):
-    print boolVal
+    #print boolVal
     global pw_on
     pw_on = boolVal
-    print "hhn", pw_on
+    #print "hhn", pw_on
+
+def getSwitchStatus():
+    global init_on, osn_on, pw_on
+    res = []
+    res.extend([init_on, osn_on, pw_on])
+    return res
 
 def setEventPos(eventLon, eventLat):
     global e_lon, e_lat

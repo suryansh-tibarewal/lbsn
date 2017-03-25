@@ -18,17 +18,14 @@ def comparePropagationModels():
     foo = []
     for i in range(3):
         if i == 0:
-            #print "volla"
             switchInitOn(True)
             switchOsnOn(False)
             switchPwOn(False)
-            #print "rishabh", osn_on, pw_on
         elif i == 1:
-            #print "sankalp"
             switchInitOn(True)
             switchOsnOn(True)
             switchPwOn(False)
-        else:
+        elif i==2:
             switchInitOn(True)
             switchOsnOn(True)
             switchPwOn(True)
@@ -37,7 +34,6 @@ def comparePropagationModels():
         for j in range(x.size):
             setP(x[j])
             res.append(F((e_lon, e_lat)))
-            #print res
         foo.append(res)
     print foo
 

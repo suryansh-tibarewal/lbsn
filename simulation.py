@@ -12,6 +12,8 @@ eventType = ['Puppetry']
 
 global influenced_list, checkIn_list, n_users, user_list
 
+global initOn, osnOn, pwOn
+
 def social_check(checkIn_entry , influenced):
     global eventType
     user_id_receiver = checkIn_entry[0]
@@ -69,7 +71,7 @@ def sharedTimeCheck(user_id, timestamp):
         if time<=(timestamp+buffer_time) and time>=(timestamp-buffer_time):
            return True
     return False
-    
+
 def physical_check(checkIn_entry , influenced, ind):
     global eventType
     global user_list
@@ -142,7 +144,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         return None
     else:
         return True
-       
+
 def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_1, outside_point_x, outside_point_y, timestamp_2):
     from shapely.geometry import LineString
     from shapely.geometry import Point
@@ -150,20 +152,28 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     circle = center.buffer(r).boundary
     line = LineString([(inside_point_x, inside_point_y), (outside_point_x, outside_point_y)])
     boundary_points = circle.intersection(line)
-    val1 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[0].coords[0][0], boundary_points.geoms[0].coords[0][1])
-    val2 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[1].coords[0][0], boundary_points.geoms[1].coords[0][1])
-    if val1<val2:
-        boundary_point_x = boundary_points.geoms[0].coords[0][0]
-        boundary_point_y = boundary_points.geoms[0].coords[0][1]
-    else :
-        boundary_point_x = boundary_points.geoms[1].coords[0][0]
-        boundary_point_y = boundary_points.geoms[1].coords[0][1]
+    boundary_point_x = boundary_points.coords[0][0]
+    boundary_point_y = boundary_points.coords[0][1]
+    #val1 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[0].coords[0][0], boundary_points.geoms[0].coords[0][1])
+    #val2 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[1].coords[0][0], boundary_points.geoms[1].coords[0][1])
+    #if val1<val2:
+    #    boundary_point_x = boundary_points.geoms[0].coords[0][0]
+    #    boundary_point_y = boundary_points.geoms[0].coords[0][1]
+    #else :
+    #    boundary_point_x = boundary_points.geoms[1].coords[0][0]
+    #    boundary_point_y = boundary_points.geoms[1].coords[0][1]
+
     time_gap = timestamp_2 - (timestamp_1 + buffer_time)
+    if(time_gap<0):
+        time_gap = timestamp_2 - timestamp_1
+    #print "time", time_gap
     speed = (eucledianDist(outside_point_x , outside_point_y , inside_point_x , inside_point_y))/time_gap
     distance = eucledianDist(inside_point_x, inside_point_y, boundary_point_x, boundary_point_y)
+    #print "distance", distance
+    #print "speed", speed
     time = distance/speed
     return (timestamp_1 + time)
-    
+
 def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
@@ -196,10 +206,12 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
             if i == len(timeList) - 1:
                 total += E_t0 + init_pro - initial
         elif initial!=-1:
-            boundary_time_stamp = getTimeStampRegion(xCen, yCen, r, prev_point_x, prev_point_y, 
+            boundary_time_stamp = getTimeStampRegion(xCen, yCen, r, prev_point_x, prev_point_y,
                                                      last_timestamp, timeList[i][3], timeList[i][2], timeList[i][1])
+
             total += boundary_time_stamp - initial
             initial = -1
+    print "total", total
     return total
 
 def check(checkIn_entry, ind):
@@ -207,8 +219,11 @@ def check(checkIn_entry, ind):
     global influenced_list
     global user_list
     user_id = checkIn_entry[0]
-    print "ioyo", osn_on, pw_on
-    influenced_bool = ((osn_on and social_check(checkIn_entry, influenced_list)) or (pw_on and physical_check(checkIn_entry, influenced_list, ind)))
+    global osnOn, pwOn
+    status = getSwitchStatus()
+    osnOn = status[1]
+    pwOn = status[2]
+    influenced_bool = ((osnOn and social_check(checkIn_entry, influenced_list)) or (pwOn and physical_check(checkIn_entry, influenced_list, ind)))
     if influenced_bool:
         online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
         random_num = random.random() # between 0 to 1
@@ -266,11 +281,16 @@ def filter_checkInList(start_time, end_time):
         return 0, 0
 
 def F(pos):
-    #print "hello"
     global influenced_list
     global checkIn_list
     global user_list
     global n_users
+    global init_on, osn_on, pw_on
+
+    status = getSwitchStatus()
+    initOn = status[0]
+    osnOn = status[1]
+    pwOn = status[2]
     checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
     user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, init_pro, add_pro)
     n_users = len(user_list)
@@ -285,7 +305,7 @@ def F(pos):
         #print "indexes"
         #print start_ind, end_ind
         #print end_ind - start_ind
-        #time.sleep(10)         
+        #time.sleep(10)
         checkIn_list = checkIn_list[start_ind: end_ind + 1]
         traverse()
     print len(influenced_list)

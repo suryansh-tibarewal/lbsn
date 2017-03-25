@@ -7,7 +7,7 @@ from collections import defaultdict
 #user[id]['influenced_bit']
 #user[id]['time_of_influence']
 interestList = list()
-     
+
 def getUserInterestsList():
     r = choice(range(0, 6, 1))
     userInterestSet = set()
@@ -24,7 +24,7 @@ def getUserInterestsList():
     userInterestSet = list(userInterestSet)
     userInterestSet.sort()
     return userInterestSet
-      
+
 def generateTimeList(event_time, init_pro, add_pro):
     low_time = event_time + init_pro
     high_time = event_time + init_pro + add_pro
@@ -40,8 +40,8 @@ def generateTimeList(event_time, init_pro, add_pro):
         r = r - 1
     timeSet = list(timeSet)
     timeSet.sort()
-    return timeSet 
-    
+    return timeSet
+
 def setGradientTimeList(start_time):
     time_list = list()
     time_list.append(start_time)
@@ -53,13 +53,9 @@ def setGradientTimeList(start_time):
         time = start_time + float(float(pow(val, 8))/pow(10,16))
         if(time<=1.0):
             time_list.append(time)
-    import matplotlib.pyplot as plt
-    plt.plot(time_list)
-    plt.ylabel('some numbers')
-    plt.show()
-    return time_list    
-    
-def main(dataset_type, event_time, init_pro, add_pro):  
+    return time_list
+
+def main(dataset_type, event_time, init_pro, add_pro):
     user_object_list = defaultdict(dict)
     f = open('interests_list.txt', 'r')
     global interestList
@@ -82,4 +78,4 @@ def main(dataset_type, event_time, init_pro, add_pro):
         user_object_list[user]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
         user_object_list[user]['online_shared'] = 0
         user_object_list[user]['offline_shared'] = 0
-    return user_object_list     
+    return user_object_list

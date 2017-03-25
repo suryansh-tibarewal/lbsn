@@ -35,10 +35,10 @@ def jaccardCoeff(a, b):
 
 def interestMatchInf(eventType, userInterest):
     global iMax1
-    #jaccCoeff = jaccardCoeff(eventType, userInterest)
-    softCoeff = get_soft_cosine(eventType, userInterest)
+    jaccCoeff = jaccardCoeff(eventType, userInterest)
+    #softCoeff = get_soft_cosine(eventType, userInterest)
     #print softCoeff
-    i1 = influence(softCoeff, iMax1)
+    i1 = influence(jaccCoeff, iMax1)
     return i1
 
 def regionStayInf(stayTime):

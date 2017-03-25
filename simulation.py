@@ -9,12 +9,7 @@ from operator import itemgetter
 
 eventType = ['Puppetry']
 
-checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
-user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, init_pro, add_pro)
-n_users = len(user_list)
-influenced_list = list()
-graph_object.initialize(BRIGHTKITE_DATASET)
-
+global influenced_list, checkIn_list, n_users, user_list
 
 def social_check(checkIn_entry , influenced):
     global eventType
@@ -175,6 +170,7 @@ def check(checkIn_entry, ind):
     global influenced_list
     global user_list
     user_id = checkIn_entry[0]
+    print "ioyo", osn_on, pw_on
     influenced_bool = ((osn_on and social_check(checkIn_entry, influenced_list)) or (pw_on and physical_check(checkIn_entry, influenced_list, ind)))
     if influenced_bool:
         online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
@@ -235,7 +231,13 @@ def F(pos):
     #print "hello"
     global influenced_list
     global checkIn_list
+    global user_list
+    global n_users
+    checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
+    user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, init_pro, add_pro)
+    n_users = len(user_list)
     influenced_list = list()
+    graph_object.initialize(BRIGHTKITE_DATASET)
     if init_on:
         new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+init_pro)
     #print influenced_list
@@ -251,6 +253,6 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-##F((0.09916773323165684, 0.3422742228921536))
+#F((0.09916773323165684, 0.3422742228921536))
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

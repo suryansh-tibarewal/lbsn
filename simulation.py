@@ -13,6 +13,7 @@ eventType = ['Puppetry']
 global influenced_list, checkIn_list, n_users, user_list
 
 global initOn, osnOn, pwOn
+global initPro, addPro, eR0
 
 def social_check(checkIn_entry , influenced):
     global eventType
@@ -39,8 +40,8 @@ def offline_edge(user_id_sender, checkIn_entry, ind):
     receiver_time = checkIn_entry[1]
     receiver_lat = checkIn_entry[2]
     receiver_lon = checkIn_entry[3]
-    low_time = receiver_time - buffer_time
-    high_time = receiver_time + buffer_time
+    low_time = receiver_time - 0.00001
+    high_time = receiver_time + 0.00001
     ind_val = ind
     while True:
         ind = ind - 1
@@ -68,7 +69,7 @@ def sharedTimeCheck(user_id, timestamp):
     global user_list
     time_list = user_list[user_id]['physical_share_time_list']
     for time in time_list:
-        if time<=(timestamp+buffer_time) and time>=(timestamp-buffer_time):
+        if time<=(timestamp+0.00001) and time>=(timestamp):
            return True
     return False
 
@@ -96,12 +97,17 @@ def physical_check(checkIn_entry , influenced, ind):
 def get_initial_users(event_lon, event_lat, start_time, end_time):
     global checkIn_list
     users_set = set()
+    print "check", len(checkIn_list)
+    print event_lon, event_lat
+    print "rp", rp
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]
         if user_id in users_set:
             continue
         if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            print "hello"
             if insideRegion(event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]):
+                print "hello2"
                 users_set.add(checkIn_entry[0])
     users_set = list(users_set)
     users_set.sort()
@@ -111,11 +117,19 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
     global eventType
     global influenced_list
     global user_list
+    global initPro
+    global eR0
+    print "shanky", start_time, end_time
+    eR0 = getInitInfReg()
+    initPro = getInitPro()
+    print "rishabhhh", initPro
     users_region_list = get_initial_users(event_lon, event_lat, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
     #print users_region_list
+    print "initial_length", len(users_region_list)
     for user_id in users_region_list:
         #print "user id", user_id
-        timeInRegion = stayTimeInRegion(event_lon, event_lat, e_r0, e_t0, init_pro, user_id)
+        timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
+        print "time", timeInRegion
         #print "time " + str(timeInRegion)
         inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
         #print "inf_prob", inf_prob
@@ -174,7 +188,7 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     time = distance/speed
     return (timestamp_1 + time)
 
-def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
+def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
     #print newList[:50]
@@ -185,7 +199,7 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
             #print "tadam"
             break
         elif uid == entry[0]:
-            if entry[1]>=E_t0 and entry[1]<=(E_t0 + init_pro):
+            if entry[1]>=E_t0 and entry[1]<=(E_t0 + initPro):
                 timeFilteredList.append(entry)
         #print timeFilteredList
     if not timeFilteredList:
@@ -204,7 +218,7 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
             if initial == -1:
                 initial = timeList[i][1]
             if i == len(timeList) - 1:
-                total += E_t0 + init_pro - initial
+                total += E_t0 + initPro - initial
         elif initial!=-1:
             boundary_time_stamp = getTimeStampRegion(xCen, yCen, r, prev_point_x, prev_point_y,
                                                      last_timestamp, timeList[i][3], timeList[i][2], timeList[i][1])
@@ -223,6 +237,7 @@ def check(checkIn_entry, ind):
     status = getSwitchStatus()
     osnOn = status[1]
     pwOn = status[2]
+    print "status_variables", osnOn, pwOn
     influenced_bool = ((osnOn and social_check(checkIn_entry, influenced_list)) or (pwOn and physical_check(checkIn_entry, influenced_list, ind)))
     if influenced_bool:
         online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
@@ -286,27 +301,36 @@ def F(pos):
     global user_list
     global n_users
     global init_on, osn_on, pw_on
+    global initPro, addPro
 
     status = getSwitchStatus()
     initOn = status[0]
     osnOn = status[1]
     pwOn = status[2]
+    initPro = getInitPro()
+    addPro = getAddPro()
+    graph_object.initialize(BRIGHTKITE_DATASET)
+    print "yoad", status
+    print "rishabh", initPro, addPro
     checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
-    user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, init_pro, add_pro)
+    user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, initPro, addPro)
     n_users = len(user_list)
     influenced_list = list()
-    graph_object.initialize(BRIGHTKITE_DATASET)
-    if init_on:
-        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+init_pro)
+    if initOn:
+        print "sdsgs", initPro
+        print "Sgfsgf", e_t0
+        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro)
     #print influenced_list
     if new_influenced!=None:
-        print len(influenced_list)
-        start_ind, end_ind = filter_checkInList(e_t0+init_pro, e_t0+init_pro+add_pro)
+        print "initial", len(influenced_list)
+        print "sdsgs", initPro
+        print "Sgfsgf", e_t0
+        start_ind, end_ind = filter_checkInList(e_t0+initPro, e_t0+initPro+addPro)
         #print "indexes"
         #print start_ind, end_ind
         #print end_ind - start_ind
-        #time.sleep(10)
         checkIn_list = checkIn_list[start_ind: end_ind + 1]
+        #time.sleep(10)
         traverse()
     print len(influenced_list)
     return len(influenced_list)

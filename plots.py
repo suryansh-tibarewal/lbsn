@@ -1,9 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from mpl_toolkits.mplot3d import axes3d
 from valueSetters import *
 from constants import *
 from simulation import F
+
 
 
 #need a list of list with list[0]
@@ -16,7 +18,7 @@ def comparePropagationModels():
     fig, ax = plt.subplots(figsize=(10,5))
 
     foo = []
-    for i in range(3):
+    for i in range(0,3):
         if i == 0:
             switchInitOn(True)
             switchOsnOn(False)
@@ -32,6 +34,7 @@ def comparePropagationModels():
         #print "rishabh", x.size
         res = []
         for j in range(x.size):
+            print x[j]
             setP(x[j])
             res.append(F((e_lon, e_lat)))
         foo.append(res)
@@ -72,23 +75,29 @@ def surfacePlot(x, y, Z, xlabel, ylabel, zlabel, xx, yy):
     plt.show()
 
 def init_pro_surfacePlot():
+    switchInitOn(True)
+    switchOsnOn(True)
+    switchPwOn(True)
     l1 = set_init_pro()
     x = l1[0]
     xlabel = l1[1]
     l2 = set_inf_prob()
     y = l2[0]
     ylabel = l2[1]
-    print 'x:: ' + x
-    Z = np.array((x.size, y.size))
+    Z = np.zeros([x.size, y.size])
+    #print Z.len
     for i in range(x.size):
         for j in range(y.size):
             setInitPro(x[i])
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.01, 0.1)
 
 def add_pro_surfacePlot():
+    switchInitOn(True)
+    switchOsnOn(True)
+    switchPwOn(True)
     l1 = set_add_pro()
     x = l1[0]
     xlabel = l1[1]
@@ -103,9 +112,13 @@ def add_pro_surfacePlot():
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.1, 0.1)
 
 def initInfReg_surfacePlot():
+    switchInitOn(True)
+    switchOsnOn(True)
+    switchPwOn(True)
+
     l1 = set_init_inf_region()
     x = l1[0]
     print 'x:: ' + x
@@ -122,7 +135,7 @@ def initInfReg_surfacePlot():
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.002, 0.1)
 
 #init_pro_surfacePlot()
-comparePropagationModels()
+init_pro_surfacePlot()

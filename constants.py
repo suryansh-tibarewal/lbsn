@@ -38,6 +38,7 @@ def recalculateProbs():
     p3 = 1.5*p
     p4 = 1.5*p
     p5 = 1.5*p
+    print p, p1
     #print p1, p2, p3, p4, p5
 
 def setP(value):
@@ -48,23 +49,49 @@ def setP(value):
     p = value
     recalculateProbs()
 
+def getP1():
+    global p1
+    return p1
+
+def getP2():
+    global p2
+    return p2
+
+def getP3():
+    global p3
+    return p3
+
+def getP4():
+    global p4
+    return p4
+
+def getP5():
+    global p5
+    return p5
+
 def setInitPro(value):
     global init_pro
     init_pro = value
 
-def getSwitchStatus():
-    global init_on, osn_on, pw_on
-    res = []
-    res.extend([init_on, osn_on, pw_on])
-    return res
+def getInitPro():
+    global init_pro
+    return init_pro
 
 def setAddPro(value):
     global add_pro
     add_pro = value
 
+def getAddPro():
+    global add_pro
+    return add_pro
+
 def setInitInfReg(value):
     global e_r0
     e_r0 = value
+
+def getInitInfReg():
+    global e_r0
+    return e_r0
 
 def switchInitOn(boolVal):
     global init_on
@@ -93,3 +120,9 @@ def setEventPos(eventLon, eventLat):
     global e_lon, e_lat
     e_lon = eventLon
     e_lat = eventLat
+
+def geteventPos():
+    global e_lon, e_lat
+    res = []
+    res.extend([e_lon, e_lat])
+    return res

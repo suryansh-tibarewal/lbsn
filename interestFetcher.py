@@ -2,13 +2,24 @@ from random import choice
 
 f = open('interest.txt', 'r')
 interestList = f.read().split(',')
-for inter in interestList:
-	inter = inter.strip()
-
+s = list()
+print type(interestList)
+#for inter in interestList:
+ #   print inter
+  #  inter = inter.strip()
+   # print inter
+    #s.append(inter)
+list1 = [1,1,1,1,1,1,1,1,1,1,1,1,1,1];
+for i in list1:
+    i +=10
+print list1
+#for 
+print interestList
+print s
 print len(interestList)
 f.close()
 
-userCount = 100
+userCount = 10
 res = []
 for i in range(userCount):
 	r = choice(range(0, 6, 1))
@@ -22,7 +33,9 @@ for i in range(userCount):
 		userInterestSet.add(userInterest)
 		r = r - 1
 	res.append(userInterestSet)
-
+    
+print res
+    
 d = {}
 d[0] = 0
 d[1] = 0

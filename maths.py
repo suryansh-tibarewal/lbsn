@@ -3,23 +3,6 @@ from random import random
 from similarity import get_soft_cosine
 from constants import *
 
-#iMax1 = 3
-#iMax2 = 1.5
-#iMax3 = 6
-#c = 5
-
-#init_pro = 0.02
-#maxDescriptionCount = 10
-
-#p1 = 0.20
-#p2 = 0.20
-#p3 = 0.20
-#p4 = 0.20
-#p5 = 0.20
-
-#propRad = 0.01
-
-
 def eucledianDist(ux, uy, vx, vy):
     dist = sqrt(pow(vx - ux, 2) + pow(vy - uy, 2))
     return dist

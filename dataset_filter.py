@@ -93,8 +93,8 @@ def draw_graph(data_list, complete_list):
     plt.show()
     raw_input()    
     
-checkInDataset = open("Brightkite_totalCheckins.txt","r")
-#checkInDataset = open("Gowalla_totalCheckins.txt","r")
+#checkInDataset = open("Brightkite_totalCheckins.txt","r")
+checkInDataset = open("Gowalla_totalCheckins.txt","r")
 count = 0
 count2 = 0
 state_count = dict()
@@ -107,7 +107,7 @@ filtered_data = list()
 complete_list = list()
 count3=0
 plot_list = list()
-filtered_dataset = open('Brightkite_filter_dataset.txt', 'w')
+filtered_dataset = open('Gowalla_filter_dataset.txt', 'w')
 for checkIn_ele in checkInDataset:
     checkIn = checkIn_ele.split()
     try:
@@ -172,14 +172,17 @@ print "error data " + str(count2)
 #f.close()
 #print "yeah yeah"
 #
-edge_list = open("Brightkite_edges.txt", "r")
+edge_list = open("Gowalla_edges.txt", "r")
 edge_count = 0
-for edge in edge_list:
-    edge = edge.split()
+edge_file = open('Gowalla_edges_filter.txt', 'w')
+for edge_ele in edge_list:
+    edge = edge_ele.split()
     user1 = edge[0].strip()
     user2 = edge[1].strip()
     if user1 in user_id_set and user2 in user_id_set:
         edge_count = edge_count + 1
+        edge_file.write(edge_ele)
+edge_file.close()
 print "edge count"
 print edge_count
 edge_list.close()

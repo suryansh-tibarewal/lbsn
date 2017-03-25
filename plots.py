@@ -9,20 +9,22 @@ from simulation import F
 #need a list of list with list[0]
 #as a list of number of inf users
 #if only initial prop for each inf prob [0.2, 0.3, 0.4, 0.5]
-def comparePropagationModels(f):
+def comparePropagationModels():
     x = np.array([0.2, 0.3, 0.4])
-
-    pos = list(range(len(x)))
+    pos = list(range(x.size))
     width = 0.25
     fig, ax = plt.subplots(figsize=(10,5))
 
-    f = []
+    foo = []
     for i in range(3):
         if i == 0:
+            #print "volla"
             switchInitOn(True)
             switchOsnOn(False)
             switchPwOn(False)
-        if i == 1:
+            #print "rishabh", osn_on, pw_on
+        elif i == 1:
+            #print "sankalp"
             switchInitOn(True)
             switchOsnOn(True)
             switchPwOn(False)
@@ -30,23 +32,23 @@ def comparePropagationModels(f):
             switchInitOn(True)
             switchOsnOn(True)
             switchPwOn(True)
-
+        #print "rishabh", x.size
+        res = []
         for j in range(x.size):
-            res = []
-            set_inf_prob(x[j])
-            res.append(F((e_lat, e_lon)))
+            setP(x[j])
+            res.append(F((e_lon, e_lat)))
+            #print res
+        foo.append(res)
+    print foo
 
-    f.append(res)
-
-
-    plt.bar(pos, f[0], width, alpha=0.5, color='#EE3224')
-    plt.bar([p + width for p in pos], f[1], width, alpha=0.5, color='#F78F1E')
-    plt.bar([p + width*2 for p in pos], f[2], width, alpha=0.5, color='#FFC222')
+    plt.bar(pos, foo[0], width, alpha=0.5, color='#EE3224')
+    plt.bar([p + width for p in pos], foo[1], width, alpha=0.5, color='#F78F1E')
+    plt.bar([p + width*2 for p in pos], foo[2], width, alpha=0.5, color='#FFC222')
 
     ax.set_ylabel('number of influenced users')
     ax.set_xlabel('influencing probability')
     ax.set_xticks([p+ 1.5*width for p in pos])
-    ax.set_xtickslabels(x)
+    ax.set_xticklabels(x)
 
     #plt.xlim(min(pos)-width, max(pos)+width*4)
     #plt.ylim([0, 2000] )
@@ -80,10 +82,10 @@ def init_pro_surfacePlot():
     l2 = set_inf_prob()
     y = l2[0]
     ylabel = l2[1]
-
+    print 'x:: ' + x
     Z = np.array((x.size, y.size))
     for i in range(x.size):
-        for j in range(init_pro.size):
+        for j in range(y.size):
             setInitPro(x[i])
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
@@ -100,7 +102,7 @@ def add_pro_surfacePlot():
 
     Z = np.array((x.size, y.size))
     for i in range(x.size):
-        for j in range(init_pro.size):
+        for j in range(y.size):
             setAddPro(x[i])
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
@@ -110,16 +112,21 @@ def add_pro_surfacePlot():
 def initInfReg_surfacePlot():
     l1 = set_init_inf_region()
     x = l1[0]
+    print 'x:: ' + x
     xlabel = l1[1]
     l2 = set_inf_prob()
     y = l2[0]
+    print 'y:: ' + y
     ylabel = l2[1]
-
+    print x.size, y.size
     Z = np.array((x.size, y.size))
     for i in range(x.size):
-        for j in range(init_pro.size):
+        for j in range(y.size):
             setInitInfReg(x[i])
             setP(y[j])
             Z[i, j] = F((e_lat, e_lon))
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
+
+#init_pro_surfacePlot()
+comparePropagationModels()

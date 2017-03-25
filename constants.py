@@ -5,13 +5,13 @@ init_on = True
 osn_on = True
 pw_on = True
 
-i_max1 = 3
-i_max2 = 1.5
-i_max3 = 6
+iMax1 = 3
+iMax2 = 1.5
+iMax3 = 6
 c = 5
 init_pro = 0.02
 add_pro = 0.2
-n_max = 10
+maxDescriptionCount = 10
 e_t0 = 0.5
 e_r0 = 0.01
 
@@ -37,6 +37,7 @@ def recalculateProbs():
     p3 = 1.5*p
     p4 = 1.5*p
     p5 = 1.5*p
+    #print p1, p2, p3, p4, p5
 
 def setP(value):
     global p
@@ -63,12 +64,15 @@ def switchInitOn(boolVal):
     init_on = boolVal
 
 def switchOsnOn(boolVal):
+    print boolVal
     global osn_on
     osn_on = boolVal
 
 def switchPwOn(boolVal):
+    print boolVal
     global pw_on
     pw_on = boolVal
+    print "hhn", pw_on
 
 def setEventPos(eventLon, eventLat):
     global e_lon, e_lat

@@ -3,11 +3,14 @@ from random import random
 from similarity import get_soft_cosine
 from constants import *
 
+global P1, P2, P3, P4, P5
+
 def eucledianDist(ux, uy, vx, vy):
     dist = sqrt(pow(vx - ux, 2) + pow(vy - uy, 2))
     return dist
 
 def influence(x, iMax):
+    #print x, iMax
     inf = (iMax - 1)*sqrt(1 - pow(1 - x, 2)) + 1
     #print "inf", inf
     return inf
@@ -19,7 +22,6 @@ def jaccardCoeff(a, b):
 def interestMatchInf(eventType, userInterest):
     global iMax1
     jaccCoeff = jaccardCoeff(eventType, userInterest)
-    
     #softCoeff = get_soft_cosine(eventType, userInterest)
     #print softCoeff
     i1 = influence(jaccCoeff, iMax1)
@@ -45,38 +47,43 @@ def friendInf(isFriend):
         return 1
 
 def init_inf_prob(eventType, userInterest, stayTime):
-    global p1, iMax1, iMax2
+    global P1, iMax1, iMax2
+    P1 = getP1()
     i1 = interestMatchInf(eventType, userInterest)
     i2 = regionStayInf(stayTime)
-    p = min(p1*i1*i2, 1)
-    return p
+    P = min(P1*i1*i2, 1)
+    return P
 
 def osn_share_prob(eventType, userInterest):
-    global p2, iMax1
+    global P2, iMax1
+    P2 = getP2()
     i1 = interestMatchInf(eventType, userInterest)
-    p = min(p2*i1, 1)
-    return p
+    P = min(P2*i1, 1)
+    return P
 
 def osn_inf_prob(eventType, userInterest, descriptionCount):
-    global p3, iMax1, iMax3
+    global P3, iMax1, iMax3
+    P3 = getP3()
     i1 = interestMatchInf(eventType, userInterest)
     i3 = recievedCopiesInf(descriptionCount)
-    p = min(p3*i1*i3, 1)
-    return p
+    P = min(P3*i1*i3, 1)
+    return P
 
 
 def pw_share_prob(eventType, userInterest):
-    global p4, iMax1
+    global P4, iMax1
+    P4 = getP4()
     i1 = interestMatchInf(eventType, userInterest)
-    p = min(p4*i1, 1)
-    return p
+    P = min(P4*i1, 1)
+    return P
 
 def phy_inf_prob(eventType, userInterest, isFriend):
-    global p5, iMax1
+    global P5, iMax1
+    P5 = getP5()
     i1 = interestMatchInf(eventType, userInterest)
     i4 = friendInf(isFriend)
-    p = min(p5*i1*i4, 1)
-    return p
+    P = min(P5*i1*i4, 1)
+    return P
 
 
 ######################################################################
@@ -90,7 +97,9 @@ def arePhysicalWorldNeighbors(ux, uy, vx, vy):
 
 def insideRegion(xCen, yCen, r, x, y):
     ans = False
+    #print xCen, yCen, r, x, y
     if (pow(x - xCen, 2) + pow(y - yCen, 2)) <= pow(r, 2):
+        print "yoda"
         ans = True
     return ans
 

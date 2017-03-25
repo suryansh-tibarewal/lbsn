@@ -26,4 +26,4 @@ def set_inf_prob():
     res.append(np.linspace(0.2, 0.5, 7))
     label = 'influencing probability'
     res.append(label)
-    retun res
+    return res

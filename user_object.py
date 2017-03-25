@@ -41,7 +41,24 @@ def generateTimeList(event_time, init_pro, add_pro):
     timeSet = list(timeSet)
     timeSet.sort()
     return timeSet 
-
+    
+def setGradientTimeList(start_time):
+    time_list = list()
+    time_list.append(start_time)
+    #for val in xrange(10,1,-1):
+    #    time = start_time + (float(1.0/val) * pow(10,-4))
+    #    if(time<=1.0):
+    #        time_list.append(time)
+    for val in xrange(1,100):
+        time = start_time + float(float(pow(val, 8))/pow(10,16))
+        if(time<=1.0):
+            time_list.append(time)
+    import matplotlib.pyplot as plt
+    plt.plot(time_list)
+    plt.ylabel('some numbers')
+    plt.show()
+    return time_list    
+    
 def main(dataset_type, event_time, init_pro, add_pro):  
     user_object_list = defaultdict(dict)
     f = open('interests_list.txt', 'r')
@@ -62,7 +79,7 @@ def main(dataset_type, event_time, init_pro, add_pro):
         user_object_list[user]['interests_list'] = getUserInterestsList()
         user_object_list[user]['influenced_bit'] = 0
         user_object_list[user]['time_of_influence'] = -1
-        user_object_list[user]['physical_share_time_list'] = generateTimeList(event_time, init_pro, add_pro)
+        user_object_list[user]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
         user_object_list[user]['online_shared'] = 0
         user_object_list[user]['offline_shared'] = 0
     return user_object_list     

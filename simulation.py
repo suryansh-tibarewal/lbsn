@@ -1,9 +1,10 @@
 import checkIn_object
 import user_object
+from user_object import setGradientTimeList
 from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
 from constants import e_t0, init_pro, add_pro, rp, e_r0, buffer_time
 import graph_object
-from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion, init_inf_prob
+from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion, init_inf_prob, eucledianDist
 import random
 import time
 from operator import itemgetter
@@ -67,6 +68,14 @@ def offline_edge(user_id_sender, checkIn_entry, ind):
                 return ind
     return -1
     
+def sharedTimeCheck(user_id, timestamp):
+    global user_list
+    time_list = user_list[user_id]['physical_share_time_list']
+    for time in time_list:
+        if time<=(timestamp+buffer_time) and time>=(timestamp-buffer_time):
+           return True
+    return False
+    
 def physical_check(checkIn_entry , influenced, ind):
     global eventType
     global user_list
@@ -79,7 +88,8 @@ def physical_check(checkIn_entry , influenced, ind):
             continue
         ind_s = offline_edge(user_id_sender, checkIn_entry, ind)
         if ind_s != -1:
-            #validTimeCheck() #check through share time list
+            if not sharedTimeCheck(user_id_sender, checkIn_entry[1]):
+                continue
             isOnlineFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)
             rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isOnlineFriend)
             random_num = random.random()
@@ -123,6 +133,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
             #print "osn", online_share_prob
             random_num = random.random() # between 0 to 1
+            user_list[user_id]['physical_share_time_list'] = setGradientTimeList(end_time)
             if random_num <= online_share_prob:
                 #print "online_Shared", random_num
                 user_list[user_id]['online_shared'] = 1
@@ -137,7 +148,28 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         return None
     else:
         return True
-
+       
+def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_1, outside_point_x, outside_point_y, timestamp_2):
+    from shapely.geometry import LineString
+    from shapely.geometry import Point
+    center = Point(xCen,yCen)
+    circle = center.buffer(r).boundary
+    line = LineString([(inside_point_x, inside_point_y), (outside_point_x, outside_point_y)])
+    boundary_points = circle.intersection(line)
+    val1 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[0].coords[0][0], boundary_points.geoms[0].coords[0][1])
+    val2 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[1].coords[0][0], boundary_points.geoms[1].coords[0][1])
+    if val1<val2:
+        boundary_point_x = boundary_points.geoms[0].coords[0][0]
+        boundary_point_y = boundary_points.geoms[0].coords[0][1]
+    else :
+        boundary_point_x = boundary_points.geoms[1].coords[0][0]
+        boundary_point_y = boundary_points.geoms[1].coords[0][1]
+    time_gap = timestamp_2 - (timestamp_1 + buffer_time)
+    speed = (eucledianDist(outside_point_x , outside_point_y , inside_point_x , inside_point_y))/time_gap
+    distance = eucledianDist(inside_point_x, inside_point_y, boundary_point_x, boundary_point_y)
+    time = distance/speed
+    return (timestamp_1 + time)
+    
 def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
@@ -162,12 +194,17 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, init_pro, uid):
         #print "yo"
         if insideRegion(xCen, yCen, r, timeList[i][3], timeList[i][2]):
             #print "hello"
+            prev_point_x = timeList[i][3]
+            prev_point_y = timeList[i][2]
+            last_timestamp = timeList[i][1]
             if initial == -1:
-                initial = timeList[i][1]            
+                initial = timeList[i][1]
             if i == len(timeList) - 1:
                 total += E_t0 + init_pro - initial                  
         elif initial!=-1:
-            total += timeList[i][1] - initial
+            boundary_time_stamp = getTimeStampRegion(xCen, yCen, r, prev_point_x, prev_point_y, 
+                                                     last_timestamp, timeList[i][3], timeList[i][2], timeList[i][1])
+            total += boundary_time_stamp - initial
             initial = -1
     return total
             
@@ -202,6 +239,7 @@ def traverse():
         if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
             if check(checkIn_entry, ind):
                 user_list[user_id]['influenced_bit'] = 1
+                user_list[user_id]['physical_share_time_list'] = setGradientTimeList(checkIn_entry[1])
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
                 influenced_list.append(user_id)

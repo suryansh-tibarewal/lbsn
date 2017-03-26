@@ -61,13 +61,13 @@ def comparePropagationModels():
 #Z = np.array([[7 values], [7 values], [...], [...], [...], [...], [...], [...]])
 ###infUsers VS add_pro VS infProb
 ###infUsers VS initInfReg VS infProb
-def surfacePlot(x, y, Z, xlabel, ylabel, zlabel, xx, yy):
+def surfacePlot(x, y, Z, xlabel, ylabel, zlabel):
     fig = plt.figure(figsize=(10,5))
     ax = fig.add_subplot(111, projection='3d')
 
     X, Y = np.meshgrid(x, y)
 
-    ax.plot_surface(X, Y, Z, cmap=cm.jet, rstride = xx, cstride = yy)
+    ax.plot_surface(X, Y, Z, cmap=cm.jet)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_zlabel(zlabel)
@@ -94,7 +94,7 @@ def init_pro_surfacePlot():
             print getInitPro(), getP1()
             Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.01, 0.1)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
 def add_pro_surfacePlot():
     switchInitOn(True)
@@ -114,7 +114,7 @@ def add_pro_surfacePlot():
             setP(y[j])
             Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.1, 0.1)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
 def initInfReg_surfacePlot():
     switchInitOn(True)
@@ -137,7 +137,7 @@ def initInfReg_surfacePlot():
             setP(y[j])
             Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
-    surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.002, 0.1)
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
 #init_pro_surfacePlot()
-init_pro_surfacePlot()
+comparePropagationModels()

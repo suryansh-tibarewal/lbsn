@@ -21,10 +21,10 @@ def jaccardCoeff(a, b):
 
 def interestMatchInf(eventType, userInterest):
     global iMax1
-    jaccCoeff = jaccardCoeff(eventType, userInterest)
-    #softCoeff = get_soft_cosine(eventType, userInterest)
+    #jaccCoeff = jaccardCoeff(eventType, userInterest)
+    softCoeff = get_soft_cosine(eventType, userInterest)
     #print softCoeff
-    i1 = influence(jaccCoeff, iMax1)
+    i1 = influence(softCoeff, iMax1)
     return i1
 
 def regionStayInf(stayTime):
@@ -97,9 +97,7 @@ def arePhysicalWorldNeighbors(ux, uy, vx, vy):
 
 def insideRegion(xCen, yCen, r, x, y):
     ans = False
-    #print xCen, yCen, r, x, y
     if (pow(x - xCen, 2) + pow(y - yCen, 2)) <= pow(r, 2):
-        #print "yoda"
         ans = True
     return ans
 

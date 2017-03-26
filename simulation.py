@@ -73,7 +73,7 @@ def sharedTimeCheck(user_id, timestamp):
     global user_list
     time_list = user_list[user_id]['physical_share_time_list']
     for time in time_list:
-        if time<=(timestamp+ pow(10, -10)) and time>=(timestamp): #check the dependency with this buffer time
+        if (time<=(timestamp+ 0.0001) and time>=timestamp): #check the dependency with this buffer time
            return True
     return False
 
@@ -99,13 +99,18 @@ def physical_check(checkIn_entry , influenced, ind):
             user_list[user_id_sender]['active'] == 0
             #print "not available", user_id_sender
             continue
+        #print "Step4"
         if insideRegion(sender_position[0], sender_position[1], rp, receiver_lon, receiver_lat):
+            #print "Step5"
             if not sharedTimeCheck(user_id_sender, checkIn_entry[1]):
                 continue
+            #print "step6"
             isOnlineFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)
             rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isOnlineFriend)
             random_num = random.random()
             if random_num <= rec_prob:
+                #print "physical influence"
+                #exit(1)
                 return True
     return False
 
@@ -270,6 +275,7 @@ def filter_checkInList(start_time, end_time):
         return 0, 0
 
 def F(pos):
+    random.seed(10)
     print "position", pos[0], pos[1]
     global influenced_list, checkIn_list, user_list, n_users
     global init_on, osn_on, pw_on
@@ -299,6 +305,6 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-F((0.09916773323165684, 0.3422742228921536))
+#F((0.09916773323165684, 0.3422742228921536))
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

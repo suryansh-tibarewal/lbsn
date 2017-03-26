@@ -9,8 +9,9 @@ import numpy as np
 def generateRandomList(start, end, num):
     return np.random.uniform(start, end, num).tolist()
 
-x_coordinates = generateRandomList(0.5, 0.6, 12)    
-y_coordinates = generateRandomList(0.45, 0.55, 12)    
+
+x_coordinates = generateRandomList(0.5, 0.6, 12)
+y_coordinates = generateRandomList(0.45, 0.55, 12)
 
 C = list()
 i=0
@@ -18,7 +19,7 @@ while i<12:
     pos = (x_coordinates[i], y_coordinates[i])
     C.append(pos)
     i = i+1
-Ns = 10 
+Ns = 10
 Ni = 10
 delta = 0.1
 alpha = 2
@@ -28,16 +29,15 @@ return_pos_time.initialize(BRIGHTKITE_DATASET)
 #shitty function minJ
 def minJ(P, rand):
     global Ns
-    for j in range(Ns):
+    den = summation(0,Ns,P)
+    for j in range(0,Ns):
         num = summation(0, j, P)
-        den = num + summation(j, Ns, P)
-        #print "hello", num, den
         if den==0:
             continue
-        expr = float(num)/den        
-        if expr > rand:
+        expr = float(num)/float(den)
+        if expr >= rand:
             return j
-    print 'minJ should return value less than Ns = ', Ns
+    return -1
     exit(1)
 
 #shitty function summation
@@ -45,6 +45,7 @@ def summation(i, j, P):
     s = 0
     for k in range(i, j):
         s += F(P[k])
+        #print 's:',s
     return s
 
 def getRandomTime(time1, time2):
@@ -63,9 +64,9 @@ def Fdash(user_object, graph_object):
             innerSum += len(graph_object.getFriends(v))
         term2 = float(innerSum)/len(phyWorldFriends)
         sum += term1 + term2
-    
-    return sum          
-        
+
+    return sum
+
 #############################################################################################################################
 
 
@@ -83,18 +84,23 @@ for i in range(Ns):
             break
     P.append(r)
 
-print 'P: ', P
-print 'Nc: ', Nc
+#print 'P: ', P
+#print 'Nc: ', Nc
 
 
 maxF = -1
 resPos = []
+# rand = random.uniform(0, 1)
+# print 'rand' , rand
+# new = minJ(P,rand)
+# print 'new:',new
+
 for i in range(Ni):
-    rand = random.random()
+    rand = random.uniform(0, 1)
     j = minJ(P, rand)
     delta = float(delta)/pow(alpha, Nc[j])
     delta = float(delta)/pow(alpha, Nc[j])
-    newC = set()
+    newC = []
     for pos in C:
         if(dis(pos, P[j]) <= delta):
             newC.add(pos)
@@ -103,4 +109,7 @@ for i in range(Ni):
     if currF > F(P[j]):
         P[j] = posNew
     Nc[j] += 1
-    
+
+max1 = Nc[0]
+
+print 'Nc:' , Nc

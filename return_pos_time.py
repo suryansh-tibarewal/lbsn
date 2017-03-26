@@ -31,6 +31,7 @@ def get_pos(uid,time):
             loc[0] = speed*time*(time_list[index+1][1]-time_list[index][1]) + time_list[index][1]
             loc[1] = speed*time*(time_list[index+1][2]-time_list[index][2]) + time_list[index][2]
             return loc
+    #print time_list[-1][0], uid, time
     if(time_list[-1][0]==time):
         return [time_list[-1][1],time_list[-1][2]]
     return None

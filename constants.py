@@ -20,7 +20,7 @@ e_lat = 0.3422742228921536
 e_lon = 0.09916773323165684
 
 # p should lie between 0 and 2/3
-p = 0.42
+p = 0.4
 p1 = p
 p2 = 1.5*p
 p3 = 1.5*p
@@ -32,14 +32,14 @@ rp = 0.01
 buffer_time = 0.000000001
 
 def recalculateProbs():
-    global p1, p2, p3, p4, p5
+    global p, p1, p2, p3, p4, p5
     p1 = p
     p2 = 1.5*p
     p3 = 1.5*p
     p4 = 1.5*p
     p5 = 1.5*p
-    print p, p1
-    #print p1, p2, p3, p4, p5
+    #print p, p1
+    print p, p1, p2, p3, p4, p5
 
 def setP(value):
     global p
@@ -100,9 +100,7 @@ def switchInitOn(boolVal):
 def switchOsnOn(boolVal):
     #print boolVal
     global osn_on
-    print "bool", boolVal
     osn_on = boolVal
-    print "tud", osn_on
 
 def switchPwOn(boolVal):
     #print boolVal

@@ -7,6 +7,8 @@ from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, ins
 import random
 import time
 from operator import itemgetter
+from return_pos_time import get_pos
+import return_pos_time
 
 eventType = ['Puppetry']
 
@@ -69,7 +71,7 @@ def sharedTimeCheck(user_id, timestamp):
     global user_list
     time_list = user_list[user_id]['physical_share_time_list']
     for time in time_list:
-        if time<=(timestamp+0.00001) and time>=(timestamp):
+        if time<=(timestamp+ pow(10, -10)) and time>=(timestamp): #check the dependency with this buffer time
            return True
     return False
 
@@ -78,13 +80,24 @@ def physical_check(checkIn_entry , influenced, ind):
     global user_list
     user_id_receiver = checkIn_entry[0]
     checkIn_time = checkIn_entry[1]
+    receiver_lat = checkIn_entry[2]
+    receiver_lon = checkIn_entry[3]
     user_id_rejected_set = set()
     # do it user wise or checkIn wise
     for user_id_sender in influenced:
         if not user_list[user_id_sender]['offline_shared']:
             continue
-        ind_s = offline_edge(user_id_sender, checkIn_entry, ind)
-        if ind_s != -1:
+        if (user_list[user_id_sender]['active'] == 0):
+            continue
+        #ind_s = offline_edge(user_id_sender, checkIn_entry, ind)
+        sender_position = get_pos(user_id_sender, checkIn_time)
+        try :
+            val = sender_position[0]
+        except:
+            user_list[user_id_sender]['active'] == 0
+            #print "not available", user_id_sender
+            continue
+        if insideRegion(sender_position[0], sender_position[1], rp, receiver_lon, receiver_lat):
             if not sharedTimeCheck(user_id_sender, checkIn_entry[1]):
                 continue
             isOnlineFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)
@@ -94,66 +107,48 @@ def physical_check(checkIn_entry , influenced, ind):
                 return True
     return False
 
-def get_initial_users(event_lon, event_lat, start_time, end_time):
+def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     global checkIn_list
     users_set = set()
-    print "check", len(checkIn_list)
-    print event_lon, event_lat
-    print "rp", rp
+    count = 0
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]
         if user_id in users_set:
             continue
         if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
-            print "hello"
+            count = count + 1
+            #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
             if insideRegion(event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]):
-                print "hello2"
                 users_set.add(checkIn_entry[0])
+    print "check entries", count
     users_set = list(users_set)
     users_set.sort()
     return users_set
 
 def initial_propogation(event_lon, event_lat, start_time, end_time):
-    global eventType
-    global influenced_list
-    global user_list
-    global initPro
-    global eR0
-    print "shanky", start_time, end_time
+    global eventType, influenced_list, user_list
+    global initPro, eR0
     eR0 = getInitInfReg()
     initPro = getInitPro()
-    print "rishabhhh", initPro
-    users_region_list = get_initial_users(event_lon, event_lat, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
-    #print users_region_list
-    print "initial_length", len(users_region_list)
+    users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
+    print "length", len(users_region_list)
     for user_id in users_region_list:
-        #print "user id", user_id
         timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
-        print "time", timeInRegion
-        #print "time " + str(timeInRegion)
         inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
-        #print "inf_prob", inf_prob
         random_num = random.random() # between 0 to 1
         if random_num <= inf_prob:
-            #print "influenced", random_num
             user_list[user_id]['influenced_bit'] = 1
             user_list[user_id]['time_of_influence'] = end_time
             influenced_list.append(user_id)
-            #print user_id, end_time
             online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
-            #print "osn", online_share_prob
             random_num = random.random() # between 0 to 1
             user_list[user_id]['physical_share_time_list'] = setGradientTimeList(end_time)
             if random_num <= online_share_prob:
-                #print "online_Shared", random_num
                 user_list[user_id]['online_shared'] = 1
             offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
-            #print "ofn", offline_share_prob
             random_num = random.random()
             if random_num <= offline_share_prob:
-                #print "offline shared", random_num
                 user_list[user_id]['offline_shared'] = 1
-    #print time.sleep(20)
     if not influenced_list:
         return None
     else:
@@ -168,50 +163,31 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     boundary_points = circle.intersection(line)
     boundary_point_x = boundary_points.coords[0][0]
     boundary_point_y = boundary_points.coords[0][1]
-    #val1 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[0].coords[0][0], boundary_points.geoms[0].coords[0][1])
-    #val2 = eucledianDist(outside_point_x, outside_point_y, boundary_points.geoms[1].coords[0][0], boundary_points.geoms[1].coords[0][1])
-    #if val1<val2:
-    #    boundary_point_x = boundary_points.geoms[0].coords[0][0]
-    #    boundary_point_y = boundary_points.geoms[0].coords[0][1]
-    #else :
-    #    boundary_point_x = boundary_points.geoms[1].coords[0][0]
-    #    boundary_point_y = boundary_points.geoms[1].coords[0][1]
-
     time_gap = timestamp_2 - (timestamp_1 + buffer_time)
     if(time_gap<0):
         time_gap = timestamp_2 - timestamp_1
-    #print "time", time_gap
     speed = (eucledianDist(outside_point_x , outside_point_y , inside_point_x , inside_point_y))/time_gap
     distance = eucledianDist(inside_point_x, inside_point_y, boundary_point_x, boundary_point_y)
-    #print "distance", distance
-    #print "speed", speed
     time = distance/speed
     return (timestamp_1 + time)
 
 def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
-    #print newList[:50]
     timeFilteredList = []
-    #print uid, newList[0][0]
     for entry in newList:
         if uid < entry[0]:
-            #print "tadam"
             break
         elif uid == entry[0]:
             if entry[1]>=E_t0 and entry[1]<=(E_t0 + initPro):
                 timeFilteredList.append(entry)
-        #print timeFilteredList
     if not timeFilteredList:
         return 0
-    #print "todo"
     timeList = sorted(timeFilteredList, key = itemgetter(1))
     initial = -1
     total = 0.0
     for i in range(len(timeList)):
-        #print "yo"
         if insideRegion(xCen, yCen, r, timeList[i][3], timeList[i][2]):
-            #print "hello"
             prev_point_x = timeList[i][3]
             prev_point_y = timeList[i][2]
             last_timestamp = timeList[i][1]
@@ -225,7 +201,7 @@ def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
 
             total += boundary_time_stamp - initial
             initial = -1
-    print "total", total
+    #print "total", total
     return total
 
 def check(checkIn_entry, ind):
@@ -237,7 +213,6 @@ def check(checkIn_entry, ind):
     status = getSwitchStatus()
     osnOn = status[1]
     pwOn = status[2]
-    print "status_variables", osnOn, pwOn
     influenced_bool = ((osnOn and social_check(checkIn_entry, influenced_list)) or (pwOn and physical_check(checkIn_entry, influenced_list, ind)))
     if influenced_bool:
         online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
@@ -255,10 +230,7 @@ def traverse():
     global checkIn_list
     global user_list
     ind = 0
-    #print "checkIN"
-    #print len(checkIn_list)
     for checkIn_entry in checkIn_list:
-        #print "traverse"
         user_id = checkIn_entry[0]
         validity_status = checkIn_entry[5]
         if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
@@ -296,10 +268,7 @@ def filter_checkInList(start_time, end_time):
         return 0, 0
 
 def F(pos):
-    global influenced_list
-    global checkIn_list
-    global user_list
-    global n_users
+    global influenced_list, checkIn_list, user_list, n_users
     global init_on, osn_on, pw_on
     global initPro, addPro
 
@@ -309,26 +278,18 @@ def F(pos):
     pwOn = status[2]
     initPro = getInitPro()
     addPro = getAddPro()
+    print initOn, osnOn, pwOn, initPro, addPro
     graph_object.initialize(BRIGHTKITE_DATASET)
-    print "yoad", status
-    print "rishabh", initPro, addPro
+    return_pos_time.initialize(BRIGHTKITE_DATASET)
     checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
     user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, initPro, addPro)
     n_users = len(user_list)
     influenced_list = list()
     if initOn:
-        print "sdsgs", initPro
-        print "Sgfsgf", e_t0
         new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro)
-    #print influenced_list
+        print len(influenced_list)
     if new_influenced!=None:
-        print "initial", len(influenced_list)
-        print "sdsgs", initPro
-        print "Sgfsgf", e_t0
         start_ind, end_ind = filter_checkInList(e_t0+initPro, e_t0+initPro+addPro)
-        #print "indexes"
-        #print start_ind, end_ind
-        #print end_ind - start_ind
         checkIn_list = checkIn_list[start_ind: end_ind + 1]
         #time.sleep(10)
         traverse()

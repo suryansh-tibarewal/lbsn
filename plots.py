@@ -88,9 +88,11 @@ def init_pro_surfacePlot():
     #print Z.len
     for i in range(x.size):
         for j in range(y.size):
+            print "yodo", x[i], y[j]
             setInitPro(x[i])
             setP(y[j])
-            Z[i, j] = F((e_lat, e_lon))
+            print getInitPro(), getP1()
+            Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.01, 0.1)
 
@@ -110,7 +112,7 @@ def add_pro_surfacePlot():
         for j in range(y.size):
             setAddPro(x[i])
             setP(y[j])
-            Z[i, j] = F((e_lat, e_lon))
+            Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.1, 0.1)
 
@@ -133,7 +135,7 @@ def initInfReg_surfacePlot():
         for j in range(y.size):
             setInitInfReg(x[i])
             setP(y[j])
-            Z[i, j] = F((e_lat, e_lon))
+            Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel, 0.002, 0.1)
 

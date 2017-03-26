@@ -99,7 +99,7 @@ def insideRegion(xCen, yCen, r, x, y):
     ans = False
     #print xCen, yCen, r, x, y
     if (pow(x - xCen, 2) + pow(y - yCen, 2)) <= pow(r, 2):
-        print "yoda"
+        #print "yoda"
         ans = True
     return ans
 

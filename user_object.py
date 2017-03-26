@@ -78,4 +78,5 @@ def main(dataset_type, event_time, init_pro, add_pro):
         user_object_list[user]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
         user_object_list[user]['online_shared'] = 0
         user_object_list[user]['offline_shared'] = 0
+        user_object_list[user]['active'] = 1
     return user_object_list

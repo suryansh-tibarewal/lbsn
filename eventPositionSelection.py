@@ -76,40 +76,46 @@ def dis(loc1, loc2):
 
 P = list()
 Nc = []
+
 for i in range(Ns):
     Nc.append(0)
     while True:
-        r = random.choice(C)
+        x = random.uniform(0, 1)
+        y = random.uniform(0, 1)
+        r = (x,y)
         if r not in P:
             break
     P.append(r)
 
-#print 'P: ', P
-#print 'Nc: ', Nc
-
-
 maxF = -1
 resPos = []
-# rand = random.uniform(0, 1)
-# print 'rand' , rand
-# new = minJ(P,rand)
-# print 'new:',new
 
 for i in range(Ni):
     rand = random.uniform(0, 1)
     j = minJ(P, rand)
     delta = float(delta)/pow(alpha, Nc[j])
-    delta = float(delta)/pow(alpha, Nc[j])
+    #delta = float(delta)/pow(alpha, Nc[j])
     newC = []
-    for pos in C:
-        if(dis(pos, P[j]) <= delta):
-            newC.add(pos)
+    #for pos in C:
+
+    while(True):
+        x = random.uniform(0, delta)
+        y = random.uniform(0, delta)
+        pos = (x,y)
+        if(dis((x,y), P[j]) <= delta):
+            newC.append(pos)
     posNew = random.choice(newC)
     currF = F(posNew)
     if currF > F(P[j]):
         P[j] = posNew
     Nc[j] += 1
 
-max1 = Nc[0]
+max_f = Nc[0]
+max_loc = (0,0)
+for loc in P:
+    temp = F(loc)
+    if(temp>max1):
+        max1 = temp
+        ans_loc = loc
 
-print 'Nc:' , Nc
+print 'loc:' , max1 , 'num:' , max_f

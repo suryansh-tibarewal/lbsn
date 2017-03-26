@@ -99,11 +99,12 @@ for i in range(Ni):
     #for pos in C:
 
     while(True):
-        x = random.uniform(0, delta)
-        y = random.uniform(0, delta)
+        x = random.uniform( Nc[j][0]-delta, Nc[j][0]+delta )
+        y = random.uniform( Nc[j][1]-delta, Nc[j][1]+delta )
         pos = (x,y)
         if(dis((x,y), P[j]) <= delta):
             newC.append(pos)
+            break
     posNew = random.choice(newC)
     currF = F(posNew)
     if currF > F(P[j]):

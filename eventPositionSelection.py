@@ -76,47 +76,54 @@ def dis(loc1, loc2):
 
 P = list()
 Nc = []
-
 for i in range(Ns):
     Nc.append(0)
     while True:
-        x = random.uniform(0, 1)
-        y = random.uniform(0, 1)
-        r = (x,y)
+        r = random.choice(C)
         if r not in P:
             break
     P.append(r)
 
+#print 'P: ', P
+#print 'Nc: ', Nc
+
+
 maxF = -1
 resPos = []
+# rand = random.uniform(0, 1)
+# print 'rand' , rand
+# new = minJ(P,rand)
+# print 'new:',new
 
 for i in range(Ni):
     rand = random.uniform(0, 1)
     j = minJ(P, rand)
     delta = float(delta)/pow(alpha, Nc[j])
-    #delta = float(delta)/pow(alpha, Nc[j])
     newC = []
-    #for pos in C:
-
     while(True):
-        x = random.uniform( Nc[j][0]-delta, Nc[j][0]+delta )
-        y = random.uniform( Nc[j][1]-delta, Nc[j][1]+delta )
+        x = random.uniform(P[j][0]-delta, P[j][0]+delta)
+        y = random.uniform(P[j][1]-delta, P[j][1]+delta)
         pos = (x,y)
         if(dis((x,y), P[j]) <= delta):
             newC.append(pos)
             break
+    for pos in C:
+        if(dis(pos, P[j]) <= delta):
+            newC.append(pos)
     posNew = random.choice(newC)
     currF = F(posNew)
     if currF > F(P[j]):
         P[j] = posNew
     Nc[j] += 1
 
-max_f = Nc[0]
-max_loc = (0,0)
-for loc in P:
-    temp = F(loc)
-    if(temp>max1):
-        max1 = temp
-        ans_loc = loc
-
-print 'loc:' , max1 , 'num:' , max_f
+max1 = Nc[0]
+maxx_val = -1
+for ele in P:
+    val = F(posNew)
+    if maxx_val<val:
+        maxx_val = val
+        best_pos = posNew
+print 'Nc:' , Nc
+print P
+print best_pos
+print maxx_val

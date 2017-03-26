@@ -16,11 +16,11 @@ maxDescriptionCount = 10
 e_t0 = 0.5
 e_r0 = 0.01
 
-e_lat = 0.3422742228921536
-e_lon = 0.09916773323165684
+#e_lat = 0.3422742228921536
+#e_lon = 0.09916773323165684
 
 # p should lie between 0 and 2/3
-p = 0.4
+p = 0.3
 p1 = p
 p2 = 1.5*p
 p3 = 1.5*p

@@ -10,7 +10,9 @@ from operator import itemgetter
 from return_pos_time import get_pos
 import return_pos_time
 
-eventType = ['Puppetry']
+eventType = ['Painting', 'Ballooning', 'Surfing']
+
+random.seed(10)
 
 global influenced_list, checkIn_list, n_users, user_list
 
@@ -268,6 +270,7 @@ def filter_checkInList(start_time, end_time):
         return 0, 0
 
 def F(pos):
+    print "position", pos[0], pos[1]
     global influenced_list, checkIn_list, user_list, n_users
     global init_on, osn_on, pw_on
     global initPro, addPro
@@ -296,6 +299,6 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-#F((0.09916773323165684, 0.3422742228921536))
+F((0.09916773323165684, 0.3422742228921536))
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

@@ -1,6 +1,7 @@
 import numpy as np
 from similarityMatrixGenerator import getInterestList
 from math import sqrt
+import pickle
 
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
@@ -53,8 +54,17 @@ def soft_cosine(v1, v2, s):
 
 matrix = getSimilarityMatrix('similarityMatrix.txt')
 interestList = getInterestList('interests_list.txt')
+
 def get_soft_cosine(v1, v2):
     global matrix, interestList
     X = vectorize(v1, interestList)
     Y = vectorize(v2, interestList)
     return soft_cosine(X, Y, matrix)
+
+with open('softCosine.pickle', 'rb') as handle:
+    dic = pickle.load(handle)
+
+def get_soft_cosine(userInterestList):
+    global dic
+    key = hash(tuple(userInterestList))
+    return dic[key]

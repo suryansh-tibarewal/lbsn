@@ -10,14 +10,23 @@ from operator import itemgetter
 from return_pos_time import get_pos
 import return_pos_time
 
-eventType = ['Painting', 'Ballooning', 'Surfing']
+
 
 random.seed(10)
 
-global influenced_list, checkIn_list, n_users, user_list
+global influenced_list, checkIn_list, n_users
 
 global initOn, osnOn, pwOn
 global initPro, addPro, eR0
+
+
+user_list = user_object.main(BRIGHTKITE_DATASET)
+
+def getUserList():
+    global user_list
+    return user_list
+
+
 
 def social_check(checkIn_entry , influenced):
     global eventType
@@ -291,7 +300,7 @@ def F(pos):
     graph_object.initialize(BRIGHTKITE_DATASET)
     return_pos_time.initialize(BRIGHTKITE_DATASET)
     checkIn_list = checkIn_object.getCheckInList(BRIGHTKITE_DATASET)
-    user_list = user_object.main(BRIGHTKITE_DATASET, e_t0, initPro, addPro)
+    user_list = user_object.reset(user_list)
     n_users = len(user_list)
     influenced_list = list()
     if initOn:
@@ -305,6 +314,9 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-#F((0.09916773323165684, 0.3422742228921536))
+start = time.clock()
+F((0.09916773323165684, 0.3422742228921536))
+print time.clock() - start
+
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

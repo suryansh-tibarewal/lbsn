@@ -9,7 +9,7 @@ from collections import defaultdict
 interestList = list()
 
 def getUserInterestsList():
-    r = choice(range(0, 6, 1))
+    r = choice(range(1, 6, 1))
     userInterestSet = set()
     global interestList
     while r>0:
@@ -55,7 +55,7 @@ def setGradientTimeList(start_time):
             time_list.append(time)
     return time_list
 
-def main(dataset_type, event_time, init_pro, add_pro):
+def main(dataset_type):
     user_object_list = defaultdict(dict)
     f = open('interests_list.txt', 'r')
     global interestList
@@ -79,4 +79,15 @@ def main(dataset_type, event_time, init_pro, add_pro):
         user_object_list[user]['online_shared'] = 0
         user_object_list[user]['offline_shared'] = 0
         user_object_list[user]['active'] = 1
+    return user_object_list
+
+def reset(user_object_list):
+    for user_id in user_object_list:
+        user_object_list[user_id]['influenced_bit'] = 0
+        user_object_list[user_id]['time_of_influence'] = -1
+        user_object_list[user_id]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
+        user_object_list[user_id]['online_shared'] = 0
+        user_object_list[user_id]['offline_shared'] = 0
+        user_object_list[user_id]['active'] = 1
+
     return user_object_list

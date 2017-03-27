@@ -96,6 +96,25 @@ def init_pro_surfacePlot():
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
+def add_pro_surfacePlot2():
+    switchInitOn(True)
+    switchOsnOn(True)
+    switchPwOn(True)
+    l1 = set_add_pro()
+    x = l1[0]
+    xlabel = l1[1]
+    l2 = set_inf_prob()
+    y = l2[0]
+    ylabel = l2[1]
+
+    Z = np.array((x.size, y.size))
+    for j in range(y.size):
+            setAddPro(x[i])
+            setP(y[j])
+            Z[i, j] = F((e_lon, e_lat))
+    zlabel = 'Number of influenced users'
+    surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
+
 def add_pro_surfacePlot():
     switchInitOn(True)
     switchOsnOn(True)

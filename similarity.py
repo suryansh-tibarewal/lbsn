@@ -2,6 +2,8 @@ import numpy as np
 from similarityMatrixGenerator import getInterestList
 from math import sqrt
 import pickle
+from math import isnan
+from constants import GOWALLA_DATASET, BRIGHTKITE_DATASET
 
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
@@ -55,16 +57,29 @@ def soft_cosine(v1, v2, s):
 matrix = getSimilarityMatrix('similarityMatrix.txt')
 interestList = getInterestList('interests_list.txt')
 
-def get_soft_cosine(v1, v2):
+def get_soft_cosine2(v1, v2):
     global matrix, interestList
     X = vectorize(v1, interestList)
     Y = vectorize(v2, interestList)
     return soft_cosine(X, Y, matrix)
 
-with open('softCosine.pickle', 'rb') as handle:
-    dic = pickle.load(handle)
+def getPickleDic(boolDataset):
+    if boolDataset == GOWALLA_DATASET:
+        with open('softCosine_GOWALLA.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    elif boolDataset == BRIGHTKITE_DATASET:
+        with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    else:
+        print 'Invalid dataset chosen'
+        exit(1)
+
+#dic = getPickleDic(BRIGHTKITE_DATASET)
 
 def get_soft_cosine(userInterestList):
     global dic
     key = hash(tuple(userInterestList))
-    return dic[key]
+    if isnan(dic[key]):
+        return 0.0
+    else:
+        return dic[key]

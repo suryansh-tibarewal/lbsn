@@ -20,13 +20,7 @@ global initOn, osnOn, pwOn
 global initPro, addPro, eR0
 
 
-user_list = user_object.main(BRIGHTKITE_DATASET)
-
-def getUserList():
-    global user_list
-    return user_list
-
-
+user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET) ####new value
 
 def social_check(checkIn_entry , influenced):
     global eventType
@@ -256,7 +250,7 @@ def traverse():
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
                 influenced_list.append(user_id)
-                print user_id, checkIn_entry[1]
+                #print user_id, checkIn_entry[1]
         ind = ind + 1
 
 def filter_checkInList(start_time, end_time):
@@ -314,9 +308,9 @@ def F(pos):
     print len(influenced_list)
     return len(influenced_list)
 
-start = time.clock()
-F((0.09916773323165684, 0.3422742228921536))
-print time.clock() - start
+#start = time.clock()
+#F((0.09916773323165684, 0.3422742228921536))
+#print time.clock() - start
 
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

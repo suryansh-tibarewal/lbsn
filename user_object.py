@@ -1,6 +1,7 @@
 from random import choice
 import random
 from collections import defaultdict
+import pickle
 
 #user[id]['interests_list']
 #user[id]['physical_share_time_list']
@@ -91,3 +92,14 @@ def reset(user_object_list):
         user_object_list[user_id]['active'] = 1
 
     return user_object_list
+
+def getUserListFromFile(boolDataset):
+    if boolDataset == 1:
+        with open('user_list_GOWALLA_DATASET.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    elif boolDataset == 0:
+        with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    else:
+        print 'Invalid dataset chosen.'
+        exit(2)

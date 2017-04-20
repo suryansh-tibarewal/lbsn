@@ -1,3 +1,6 @@
+NEG_INF = True
+
+
 BRIGHTKITE_DATASET = 0
 GOWALLA_DATASET = 1
 
@@ -5,6 +8,10 @@ init_on = True
 osn_on = True
 pw_on = True
 
+w1 = 1.
+w2 = 1.
+w3 = 1.
+w4  = 1.
 
 iMax1 = 3
 iMax2 = 1.5

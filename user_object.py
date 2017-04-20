@@ -1,6 +1,8 @@
 from random import choice
 import random
 from collections import defaultdict
+import pickle
+from constants import NEG_INF
 
 #user[id]['interests_list']
 #user[id]['physical_share_time_list']
@@ -8,7 +10,9 @@ from collections import defaultdict
 #user[id]['time_of_influence']
 interestList = list()
 
-def getUserInterestsList():
+def getUserInterestsList(posInterestSet = list()):
+    #if posInterestSet:
+    #    print 'Inside getUserInterestsList :: ', posInterestSet
     r = choice(range(1, 6, 1))
     userInterestSet = set()
     global interestList
@@ -17,12 +21,13 @@ def getUserInterestsList():
         while flag:
             userInterest = choice(interestList).strip()
             userInterest = userInterest.replace(" ", "_")
-            if userInterest not in userInterestSet:
+            if userInterest not in userInterestSet and userInterest not in posInterestSet:
                 flag = False
         userInterestSet.add(userInterest)
         r = r - 1
     userInterestSet = list(userInterestSet)
     userInterestSet.sort()
+
     return userInterestSet
 
 def generateTimeList(event_time, init_pro, add_pro):
@@ -73,12 +78,20 @@ def main(dataset_type):
 
     for user in user_id_set:
         user_object_list[user]['interests_list'] = getUserInterestsList()
+        #print 'pos:: ', user_object_list[user]['interests_list']
+        if NEG_INF:
+            user_object_list[user]['neg_interests_list'] = getUserInterestsList(user_object_list[user]['interests_list'])
+        #     print 'neg:: ', user_object_list[user]['neg_interests_list']
+        #     for neg in user_object_list[user]['neg_interests_list']:
+        #         if neg in user_object_list[user]['interests_list']:
+        #             print 'False'
         user_object_list[user]['influenced_bit'] = 0
         user_object_list[user]['time_of_influence'] = -1
         user_object_list[user]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
         user_object_list[user]['online_shared'] = 0
         user_object_list[user]['offline_shared'] = 0
         user_object_list[user]['active'] = 1
+        #user_object_list[user]['influence_parameter_weights'] = [1., 1., 1., 1.]
     return user_object_list
 
 def reset(user_object_list):
@@ -89,5 +102,28 @@ def reset(user_object_list):
         user_object_list[user_id]['online_shared'] = 0
         user_object_list[user_id]['offline_shared'] = 0
         user_object_list[user_id]['active'] = 1
-
+        #user_object_list[user_id]['influence_parameter_weights'] = [1., 1., 1., 1.]
     return user_object_list
+
+def getUserListFromFile(boolDataset):
+    if boolDataset == 1:
+        if NEG_INF:
+            with open('user_list_GOWALLA_DATASET_NEGINF.pickle', 'rb') as handle:
+                return pickle.load(handle)
+        else:
+            with open('user_list_GOWALLA_DATASET.pickle', 'rb') as handle:
+                return pickle.load(handle)
+
+    elif boolDataset == 0:
+        if NEG_INF:
+            with open('user_list_BRIGHTKITE_DATASET_NEGINF.pickle', 'rb') as handle:
+                return pickle.load(handle)
+        else:
+            with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
+                return pickle.load(handle)
+    else:
+        print 'Invalid dataset chosen.'
+        exit(2)
+
+#main(0)
+#getUserListFromFile(0)

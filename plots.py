@@ -88,7 +88,7 @@ def init_pro_surfacePlot():
     #print Z.len
     for i in range(x.size):
         for j in range(y.size):
-            print "yodo", x[i], y[j]
+            #print "yodo", x[i], y[j]
             setInitPro(x[i])
             setP(y[j])
             print getInitPro(), getP1()
@@ -126,13 +126,14 @@ def add_pro_surfacePlot():
     y = l2[0]
     ylabel = l2[1]
 
-    Z = np.array((x.size, y.size))
+    Z = np.zeros((x.size, y.size))
     for i in range(x.size):
         for j in range(y.size):
             setAddPro(x[i])
             setP(y[j])
             Z[i, j] = F((e_lon, e_lat))
     zlabel = 'Number of influenced users'
+    print Z
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
 def initInfReg_surfacePlot():
@@ -142,14 +143,15 @@ def initInfReg_surfacePlot():
 
     l1 = set_init_inf_region()
     x = l1[0]
-    print 'x:: ' + x
+    #print 'x:: ' + x
     xlabel = l1[1]
     l2 = set_inf_prob()
     y = l2[0]
-    print 'y:: ' + y
+    #print 'y:: ' + y
     ylabel = l2[1]
-    print x.size, y.size
-    Z = np.array((x.size, y.size))
+    #print x.size, y.size
+    Z = np.zeros((x.size, y.size))
+    #Z = np.loadtxt('r.txt')
     for i in range(x.size):
         for j in range(y.size):
             setInitInfReg(x[i])
@@ -158,5 +160,6 @@ def initInfReg_surfacePlot():
     zlabel = 'Number of influenced users'
     surfacePlot(x, y, Z, xlabel, ylabel, zlabel)
 
-#init_pro_surfacePlot()
-comparePropagationModels()
+init_pro_surfacePlot()
+#comparePropagationModels()
+#initInfReg_surfacePlot()

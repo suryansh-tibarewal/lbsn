@@ -30,6 +30,6 @@ def checkDirectedEdge(from_vertex, to_vertex):
 ##1 and 0 now not True and False, is it used somewhere else?
 def checkUnDirectedEdge(from_vertex, to_vertex):
     if checkDirectedEdge(from_vertex, to_vertex) or checkDirectedEdge(to_vertex, from_vertex):
-        return 1
+        return True
     else:
-        return 0
+        return False

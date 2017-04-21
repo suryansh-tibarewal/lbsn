@@ -54,9 +54,11 @@ def recievedCopiesInf(descriptionCount, negDescriptionCount):
     else:
         if descriptionCount == 0 and negDescriptionCount == 0:
             return 0.0
-        exp = float(descriptionCount)/maxDescriptionCount
+        exp = float(descriptionCount - negDescriptionCount)/maxDescriptionCount
+    polarity = exp/abs(exp)
+    exp = abs(exp)
     i3 = influence(min(exp, 1), iMax3)
-    return i3*w3
+    return i3*w3*polarity
 
 def friendInf(friendPolarity):
     global c

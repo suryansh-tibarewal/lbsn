@@ -60,26 +60,16 @@ def get_soft_cosine2(v1, v2, negList = list()):
 
 def getPickleDic(boolDataset):
     if boolDataset == GOWALLA_DATASET:
-        if NEG_INF:
-            with open('softCosine_GOWALLA_NEGINF.pickle', 'rb') as handle:
-                return pickle.load(handle)
-        else:
-            with open('softCosine_GOWALLA.pickle', 'rb') as handle:
-                return pickle.load(handle)
-
+        with open('softCosine_GOWALLA.pickle', 'rb') as handle:
+            return pickle.load(handle)
     elif boolDataset == BRIGHTKITE_DATASET:
-        if NEG_INF:
-            with open('softCosine_BRIGHTKITE_NEGINF.pickle', 'rb') as handle:
-                return pickle.load(handle)
-        else:
-            with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
-                return pickle.load(handle)
-
+        with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
+            return pickle.load(handle)
     else:
         print 'Invalid dataset chosen'
         exit(1)
 
-dic = getPickleDic(BRIGHTKITE_DATASET)
+#dic = getPickleDic(BRIGHTKITE_DATASET)
 
 def get_soft_cosine(userInterestList, negUserInterestList):
     global dic
@@ -87,12 +77,12 @@ def get_soft_cosine(userInterestList, negUserInterestList):
         key = hash(tuple(userInterestList))
     else:
         key = hash(tuple([tuple(userInterestList), tuple(negUserInterestList)]))
-    print 'hello'
-    print userInterestList
-    print negUserInterestList
+    #print 'hello'
+    #print userInterestList
+    #print negUserInterestList
     if isnan(dic[key]):
-        print 'sc :: ' + str(0.0)
+        #print 'sc :: ' + str(0.0)
         return 0.0
     else:
-        print 'sc :: ', dic[key]
+        #print 'sc :: ', dic[key]
         return dic[key]

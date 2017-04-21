@@ -34,8 +34,10 @@ def interestMatchInf(eventType, userInterest, negUserInterest):
     #jaccCoeff = jaccardCoeff(eventType, userInterest)
 
     softCoeff = get_soft_cosine(userInterest, negUserInterest)
+    polarity = softCoeff/abs(softCoeff)    
     #print softCoeff
     i1 = influence(abs(softCoeff), iMax1)
+    i1 = i1 * polarity
     return i1*w1
 
 def regionStayInf(stayTime):
@@ -52,12 +54,14 @@ def recievedCopiesInf(descriptionCount):
     i3 = influence(min(exp, 1), iMax3)
     return i3*w3
 
-def friendInf(friendPolarity):
+def friendInf(isFriend, friendPolarity):
     global c
-    if friendPolarity == 0:
-        return float(1)*w4
+    if friendPolarity is None:
+       friendPolarity = 1
+    if isFriend:
+        return friendPolarity*c*w4
     else:
-        return float(c*friendPolarity)*w4
+        return friendPolarity*1*w4 
 
 def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
     #print 'init_inf_prob'
@@ -99,11 +103,11 @@ def pw_share_prob(eventType, userInterest):
     P = min(P4*i1, 1)
     return P
 
-def phy_inf_prob(eventType, userInterest, friendPolarity, negUserInterest = None):
+def phy_inf_prob(eventType, userInterest, isFriend, negUserInterest = None, friendPolarity = None):
     global P5, iMax1
     P5 = getP5()
-    i1 = interestMatchInf(eventType, userInterest)
-    i4 = friendInf(friendPolarity)
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i4 = friendInf(isFriend, friendPolarity)
     if negUserInterest is None:
         P = min(P5*i1*i4, 1)
     else:

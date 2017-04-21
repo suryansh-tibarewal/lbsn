@@ -206,7 +206,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         return None
     else:
         return True
-
+ 
 def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_1, outside_point_x, outside_point_y, timestamp_2):
     from shapely.geometry import LineString
     from shapely.geometry import Point

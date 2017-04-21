@@ -36,6 +36,7 @@ def interestMatchInf(eventType, userInterest, negUserInterest):
     softCoeff = get_soft_cosine(userInterest, negUserInterest)
     polarity = softCoeff/abs(softCoeff)    
     #print softCoeff
+    polarity = softCoeff/abs(softCoeff)
     i1 = influence(abs(softCoeff), iMax1)
     i1 = i1 * polarity
     return i1*w1
@@ -46,13 +47,20 @@ def regionStayInf(stayTime):
     i2 = influence(normalizedStayTime, iMax2)
     return i2*w2
 
-def recievedCopiesInf(descriptionCount):
+def recievedCopiesInf(descriptionCount, negDescriptionCount):
     global iMax3, maxDescriptionCount
-    if descriptionCount == 0:
-        return 0.0
-    exp = float(descriptionCount)/maxDescriptionCount
+    if negDescriptionCount is None:
+        if descriptionCount == 0:
+            return 0.0
+        exp = float(descriptionCount - 1)/maxDescriptionCount
+    else:
+        if descriptionCount == 0 and negDescriptionCount == 0:
+            return 0.0
+        exp = float(descriptionCount - negDescriptionCount)/maxDescriptionCount
+    polarity = exp/abs(exp)
+    exp = abs(exp)
     i3 = influence(min(exp, 1), iMax3)
-    return i3*w3
+    return i3*w3*polarity
 
 def friendInf(isFriend, friendPolarity):
     global c
@@ -69,12 +77,7 @@ def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
     P1 = getP1()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i2 = regionStayInf(stayTime)
-    if negUserInterest is None:
-        P = min(P1*i1*i2, 1)
-        #print 'oldP used'
-    else:
-        P = min(newP(P1, i1, i2), 1)
-        #print 'newP used'
+    P = min(newP(P1, i1, i2), 1)
     return P
 
 def osn_share_prob(eventType, userInterest):
@@ -84,15 +87,12 @@ def osn_share_prob(eventType, userInterest):
     P = min(P2*i1, 1)
     return P
 
-def osn_inf_prob(eventType, userInterest, descriptionCount, negUserInterest = None):
+def osn_inf_prob(eventType, userInterest, descriptionCount, negUserInterest = None, negDescriptionCount = None):
     global P3, iMax1, iMax3
     P3 = getP3()
-    i1 = interestMatchInf(eventType, userInterest)
-    i3 = recievedCopiesInf(descriptionCount)
-    if negUserInterest is None:
-        P = min(P3*i1*i3, 1)
-    else:
-        P = min(newP(P3, i1, i3), 1)
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i3 = recievedCopiesInf(descriptionCount, negDescriptionCount)
+    P = min(newP(P3, i1, i3), 1)
     return P
 
 
@@ -108,10 +108,7 @@ def phy_inf_prob(eventType, userInterest, isFriend, negUserInterest = None, frie
     P5 = getP5()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i4 = friendInf(isFriend, friendPolarity)
-    if negUserInterest is None:
-        P = min(P5*i1*i4, 1)
-    else:
-        P = min(newP(P5, i1, i4), 1)
+    P = min(newP(P5, i1, i4), 1)
     return P
 
 

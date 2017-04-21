@@ -2,8 +2,7 @@ from random import choice
 import random
 from collections import defaultdict
 import pickle
-from constants import NEG_INF
-
+from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
 #user[id]['interests_list']
 #user[id]['physical_share_time_list']
 #user[id]['influenced_bit']
@@ -21,7 +20,7 @@ def getUserInterestsList(posInterestSet = list()):
         while flag:
             userInterest = choice(interestList).strip()
             userInterest = userInterest.replace(" ", "_")
-            if userInterest not in userInterestSet and userInterest not in posInterestSet:
+            if (userInterest not in userInterestSet) and (userInterest not in posInterestSet):
                 flag = False
         userInterestSet.add(userInterest)
         r = r - 1
@@ -79,8 +78,7 @@ def main(dataset_type):
     for user in user_id_set:
         user_object_list[user]['interests_list'] = getUserInterestsList()
         #print 'pos:: ', user_object_list[user]['interests_list']
-        if NEG_INF:
-            user_object_list[user]['neg_interests_list'] = getUserInterestsList(user_object_list[user]['interests_list'])
+        user_object_list[user]['neg_interests_list'] = getUserInterestsList(user_object_list[user]['interests_list'])
         #     print 'neg:: ', user_object_list[user]['neg_interests_list']
         #     for neg in user_object_list[user]['neg_interests_list']:
         #         if neg in user_object_list[user]['interests_list']:
@@ -106,24 +104,15 @@ def reset(user_object_list):
     return user_object_list
 
 def getUserListFromFile(boolDataset):
-    if boolDataset == 1:
-        if NEG_INF:
-            with open('user_list_GOWALLA_DATASET_NEGINF.pickle', 'rb') as handle:
-                return pickle.load(handle)
-        else:
-            with open('user_list_GOWALLA_DATASET.pickle', 'rb') as handle:
-                return pickle.load(handle)
-
-    elif boolDataset == 0:
-        if NEG_INF:
-            with open('user_list_BRIGHTKITE_DATASET_NEGINF.pickle', 'rb') as handle:
-                return pickle.load(handle)
-        else:
-            with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
-                return pickle.load(handle)
+    if boolDataset is GOWALLA_DATASET:
+        with open('user_list_GOWALLA_DATASET.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    elif boolDataset is BRIGHTKITE_DATASET:
+        with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
+            return pickle.load(handle)
     else:
         print 'Invalid dataset chosen.'
         exit(2)
 
 #main(0)
-#getUserListFromFile(0)
+#print getUserListFromFile(BRIGHTKITE_DATASET)

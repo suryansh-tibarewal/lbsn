@@ -16,6 +16,9 @@ def influence(x, iMax):
     return inf
 
 def newP(baseP, i1, i2):
+    if i1 == 0 or i2 == 0:
+        return 0.
+
     t1 = max(abs(i1), abs(i2))
     t21 = min(abs(i1), abs(i2))
     t22 = (float(i1*i2)) / (abs(i1*i2))
@@ -79,7 +82,13 @@ def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
     P1 = getP1()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i2 = regionStayInf(stayTime)
-    P = min(newP(P1, i1, i2), 1)
+    prob = newP(P1, i1, i2)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 def osn_share_prob(eventType, userInterest):
@@ -94,7 +103,13 @@ def osn_inf_prob(eventType, userInterest, descriptionCount, negUserInterest = No
     P3 = getP3()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i3 = recievedCopiesInf(descriptionCount, negDescriptionCount)
-    P = min(newP(P3, i1, i3), 1)
+    prob = newP(P1, i1, i3)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 
@@ -110,7 +125,13 @@ def phy_inf_prob(eventType, userInterest, isFriend, negUserInterest = None, frie
     P5 = getP5()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i4 = friendInf(isFriend, friendPolarity)
-    P = min(newP(P5, i1, i4), 1)
+    prob = newP(P1, i1, i4)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 

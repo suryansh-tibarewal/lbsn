@@ -42,6 +42,7 @@ def social_check(checkIn_entry , influenced):
                         description_count = description_count + 1
                     elif polarity == -1:
                         neg_description_count = neg_description_count + 1
+    #print description_count, neg_description_count
     #if description_count > 0:   ####What is this ??????
     if NEG_INF:
         #print 'in NEG_INF1 :: ', user_list[user_id_receiver]['neg_interests_list']
@@ -49,6 +50,7 @@ def social_check(checkIn_entry , influenced):
     else:
         rec_prob = osn_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], description_count)
     if rec_prob != 0:
+        print "osn_inf_prob", rec_prob
         polarity = rec_prob/abs(rec_prob)
         rec_prob = abs(rec_prob)
         random_num = random.random()
@@ -130,6 +132,7 @@ def physical_check(checkIn_entry , influenced, ind):
             else:
                 rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isFriend)
             if rec_prob!=0:
+                print "phy_inf_prob", rec_prob
                 polarity = rec_prob/abs(rec_prob)
                 rec_prob = abs(rec_prob)
                 random_num = random.random()
@@ -177,6 +180,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             #print 'not in NEG_INF :: ', user_list[user_id]['neg_interests_list']
             inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
         if inf_prob!=0:
+            print "init_inf", inf_prob
             polarity = inf_prob/abs(inf_prob)
             inf_prob = abs(inf_prob)
         random_num = random.random() # between 0 to 1

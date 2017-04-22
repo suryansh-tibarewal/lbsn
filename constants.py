@@ -1,4 +1,4 @@
-NEG_INF = True
+NEG_INF = False
 
 
 BRIGHTKITE_DATASET = 0

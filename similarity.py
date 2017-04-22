@@ -4,6 +4,9 @@ from math import sqrt
 import pickle
 from math import isnan
 from constants import GOWALLA_DATASET, BRIGHTKITE_DATASET, NEG_INF
+import pprint
+
+pp = pprint.PrettyPrinter(indent = 4)
 
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
@@ -69,17 +72,18 @@ def getPickleDic(boolDataset):
         print 'Invalid dataset chosen'
         exit(1)
 
-#dic = getPickleDic(BRIGHTKITE_DATASET)
-
+dic = getPickleDic(BRIGHTKITE_DATASET)
+#pp.pprint(dic)
 def get_soft_cosine(userInterestList, negUserInterestList):
     global dic
     if negUserInterestList is None:
-        key = hash(tuple(userInterestList))
+        key = tuple(userInterestList)
     else:
-        key = hash(tuple([tuple(userInterestList), tuple(negUserInterestList)]))
+        key = tuple([tuple(userInterestList), tuple(negUserInterestList)])
     #print 'hello'
     #print userInterestList
     #print negUserInterestList
+    #print dic[key]
     if isnan(dic[key]):
         #print 'sc :: ' + str(0.0)
         return 0.0

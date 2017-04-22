@@ -73,9 +73,13 @@ def main(dataset_type):
     for checkIn in checkInList:
         user = int((checkIn.split())[0].strip())
         user_id_set.add(user)
+        # if user==8472:
+        #     print "volla"
     checkInList.close()
 
     for user in user_id_set:
+        # if user==8472:
+        #     print "yolo"
         user_object_list[user]['interests_list'] = getUserInterestsList()
         #print 'pos:: ', user_object_list[user]['interests_list']
         user_object_list[user]['neg_interests_list'] = getUserInterestsList(user_object_list[user]['interests_list'])
@@ -105,14 +109,20 @@ def reset(user_object_list):
 
 def getUserListFromFile(boolDataset):
     if boolDataset is GOWALLA_DATASET:
+        #print "gowalla"
         with open('user_list_GOWALLA_DATASET.pickle', 'rb') as handle:
             return pickle.load(handle)
     elif boolDataset is BRIGHTKITE_DATASET:
+        #print "brightkite"
         with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
             return pickle.load(handle)
     else:
         print 'Invalid dataset chosen.'
         exit(2)
 
+#print 0 is 1
 #main(0)
-#print getUserListFromFile(BRIGHTKITE_DATASET)
+#d = getUserListFromFile(BRIGHTKITE_DATASET)
+#print len(d.keys())
+#if 8472 in d:
+#     print 'd'

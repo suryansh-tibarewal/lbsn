@@ -1,7 +1,7 @@
 from similarity import get_soft_cosine2
 from constants import eventType
 import pickle
-#from maths import influence
+from maths import influence
 from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET, NEG_INF
 import math
 import user_object
@@ -14,7 +14,7 @@ def saveUserListtoFile(boolDataset):
             pickle.dump(user_list, handle, protocol = pickle.HIGHEST_PROTOCOL)
 
     elif boolDataset == BRIGHTKITE_DATASET:
-        user_list = user_object.main(GOWALLA_DATASET)
+        user_list = user_object.main(BRIGHTKITE_DATASET)
         #print user_list
         with open('user_list_BRIGHTKITE_DATASET.pickle', 'wb') as handle:
             pickle.dump(user_list, handle, protocol = pickle.HIGHEST_PROTOCOL)
@@ -29,14 +29,18 @@ def getSoftCosineDic(boolDataset):
     #print user_list
     for user in user_list:
         #print 'starts'
-        interestList = user_list[user]['interests_list']
-        hashKey = hash(tuple(interestList))
-        dic[hashKey] = get_soft_cosine2(eventType, interestList)
-        negInterestList = user_list[user]['neg_interests_list']
-        hashKey = hash(tuple(negInterestList))
-        dic[hashKey] = get_soft_cosine2(eventType, negInterestList)
-        hashKey = hash(tuple([tuple(interestList), tuple(negInterestList)]))
-        dic[hashKey] = get_soft_cosine2(eventType, interestList, negList = negInterestList)
+        posInterestList = tuple(user_list[user]['interests_list'])
+        #hashKey = hash(tuple(interestList))
+        if posInterestList not in dic:
+            dic[posInterestList] = get_soft_cosine2(eventType, posInterestList)
+        negInterestList = tuple(user_list[user]['neg_interests_list'])
+        #hashKey = hash(tuple(negInterestList))
+        if negInterestList not in dic:
+            dic[negInterestList] = get_soft_cosine2(eventType, negInterestList)
+        totInterestList = tuple([tuple(posInterestList), tuple(negInterestList)])
+        #hashKey = hash(tuple([tuple(interestList), tuple(negInterestList)]))
+        if totInterestList not in dic:
+            dic[totInterestList] = get_soft_cosine2(eventType, posInterestList, negInterestList)
         #print 'ends'
 
     return dic
@@ -60,3 +64,4 @@ print 'done'
 #saveUserListtoFile(GOWALLA_DATASET)
 #saveUserListtoFile(BRIGHTKITE_DATASET)
 #getSoftCosineDic(BRIGHTKITE_DATASET)
+#print getSoftCosineDic(BRIGHTKITE_DATASET)

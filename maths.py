@@ -34,9 +34,9 @@ def interestMatchInf(eventType, userInterest, negUserInterest):
     #jaccCoeff = jaccardCoeff(eventType, userInterest)
 
     softCoeff = get_soft_cosine(userInterest, negUserInterest)
-    polarity = softCoeff/abs(softCoeff)    
-    #print softCoeff
-    polarity = softCoeff/abs(softCoeff)
+    polarity = 1
+    if softCoeff != 0:
+        polarity = softCoeff/abs(softCoeff)
     i1 = influence(abs(softCoeff), iMax1)
     i1 = i1 * polarity
     return i1*w1
@@ -57,7 +57,9 @@ def recievedCopiesInf(descriptionCount, negDescriptionCount):
         if descriptionCount == 0 and negDescriptionCount == 0:
             return 0.0
         exp = float(descriptionCount - negDescriptionCount)/maxDescriptionCount
-    polarity = exp/abs(exp)
+    polarity = 1
+    if exp != 0:
+        polarity = exp/abs(exp)
     exp = abs(exp)
     i3 = influence(min(exp, 1), iMax3)
     return i3*w3*polarity
@@ -69,7 +71,7 @@ def friendInf(isFriend, friendPolarity):
     if isFriend:
         return friendPolarity*c*w4
     else:
-        return friendPolarity*1*w4 
+        return friendPolarity*1*w4
 
 def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
     #print 'init_inf_prob'

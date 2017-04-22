@@ -1,5 +1,5 @@
-NEG_INF = False
-
+NEG_INF = True
+NEG_ONLY = False
 
 BRIGHTKITE_DATASET = 0
 GOWALLA_DATASET = 1
@@ -19,7 +19,7 @@ iMax3 = 6
 c = 5
 init_pro = 0.02
 add_pro = 0.2
-maxDescriptionCount = 10
+maxDescriptionCount = 10.
 e_t0 = 0.5
 e_r0 = 0.01
 

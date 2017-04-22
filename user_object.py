@@ -2,7 +2,7 @@ from random import choice
 import random
 from collections import defaultdict
 import pickle
-from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
+from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET, NEG_ONLY
 #user[id]['interests_list']
 #user[id]['physical_share_time_list']
 #user[id]['influenced_bit']
@@ -87,6 +87,8 @@ def main(dataset_type):
         #     for neg in user_object_list[user]['neg_interests_list']:
         #         if neg in user_object_list[user]['interests_list']:
         #             print 'False'
+        if NEG_ONLY:
+            user_object_list[user]['interests_list'] = user_object_list[user]['neg_interests_list']
         user_object_list[user]['influenced_bit'] = 0
         user_object_list[user]['time_of_influence'] = -1
         user_object_list[user]['physical_share_time_list'] = list()  #generateTimeList(event_time, init_pro, add_pro)
@@ -104,6 +106,7 @@ def reset(user_object_list):
         user_object_list[user_id]['online_shared'] = 0
         user_object_list[user_id]['offline_shared'] = 0
         user_object_list[user_id]['active'] = 1
+        #user_object_list[user_id]['interests_list'] = user_object_list[user_id]['neg_interests_list']
         #user_object_list[user_id]['influence_parameter_weights'] = [1., 1., 1., 1.]
     return user_object_list
 

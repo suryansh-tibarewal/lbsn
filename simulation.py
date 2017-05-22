@@ -20,7 +20,7 @@ global initOn, osnOn, pwOn
 global initPro, addPro, eR0
 
 #influenced_bit = 0
-user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET) ####new value
+user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET, NEG_ONLY) ####new value
 #print 8472 in user_list.keys()
 #if 8472 in user_list.keys():
     #print "yo3"
@@ -50,7 +50,7 @@ def social_check(checkIn_entry , influenced):
     else:
         rec_prob = osn_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], description_count)
     if rec_prob != 0:
-        print "osn_inf_prob", rec_prob
+        #print "osn_inf_prob", rec_prob
         polarity = rec_prob/abs(rec_prob)
         rec_prob = abs(rec_prob)
         random_num = random.random()
@@ -132,7 +132,7 @@ def physical_check(checkIn_entry , influenced, ind):
             else:
                 rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isFriend)
             if rec_prob!=0:
-                print "phy_inf_prob", rec_prob
+                #print "phy_inf_prob", rec_prob
                 polarity = rec_prob/abs(rec_prob)
                 rec_prob = abs(rec_prob)
                 random_num = random.random()
@@ -160,14 +160,75 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     users_set.sort()
     return users_set
 
+def get_online_initial_users(start_time, end_time):
+    global checkIn_list
+    users_set = set()
+    cluster = get_cluster_user_list() #######################
+    count = 0
+    for checkIn_entry in checkIn_list:
+        user_id = checkIn_entry[0]
+        if user_id in users_set:
+            continue
+        if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            count = count + 1
+            #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
+            if user_id in cluster:
+                users_set.add(user_id)
+    print "check entries", count
+    users_set = list(users_set)
+    users_set.sort()
+    return users_set
+
 def initial_propogation(event_lon, event_lat, start_time, end_time):
     global eventType, influenced_list, user_list
     global initPro, eR0
     eR0 = getInitInfReg()
     initPro = getInitPro()
-    users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
+    if OFFLINE_EVENT:
+        users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
+    if ONLINE_EVENT:
+        users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
     #print "length", len(users_region_list)
     #print "yo", len(user_list)
+    for user_id in users_online_region_list:
+        numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
+        if NEG_INF:
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, user_list[user_id]['neg_interests_list'])
+        else:
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins)
+        if inf_prob!=0:
+            #print "init_inf", inf_prob
+            polarity = inf_prob/abs(inf_prob)
+            inf_prob = abs(inf_prob)
+        random_num = random.random() # between 0 to 1
+        if random_num <= inf_prob:
+            user_list[user_id]['influenced_bit'] = polarity
+            user_list[user_id]['time_of_influence'] = end_time
+            influenced_list.append(user_id)
+            #if user_list[user_id]['influenced_bit'] > 0:
+            if polarity==1:
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+            elif polarity==-1 :
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in osn_share"
+                exit(1)
+
+            random_num = random.random() # between 0 to 1
+            user_list[user_id]['physical_share_time_list'] = setGradientTimeList(end_time)
+            if random_num <= online_share_prob:
+                user_list[user_id]['online_shared'] = 1
+            if polarity==1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+            elif polarity==-1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in offline_share"
+                exit(1)
+            random_num = random.random()
+            if random_num <= offline_share_prob:
+                user_list[user_id]['offline_shared'] = 1
+
     for user_id in users_region_list:
         timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
         #print "user", user_id
@@ -180,7 +241,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             #print 'not in NEG_INF :: ', user_list[user_id]['neg_interests_list']
             inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
         if inf_prob!=0:
-            print "init_inf", inf_prob
+            #print "init_inf", inf_prob
             polarity = inf_prob/abs(inf_prob)
             inf_prob = abs(inf_prob)
         random_num = random.random() # between 0 to 1
@@ -237,6 +298,15 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     time = distance/speed
     return (timestamp_1 + time)
 
+def getNumberOfLogins(user_id, start_time, end_time):
+    global checkIn_list
+    count = 0
+    for checkIn_entry in checkIn_list:
+        if (checkIn_entry[0] == user_id) and (checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time):
+            count += 1
+
+    return count
+    
 def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
@@ -322,7 +392,7 @@ def traverse():
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
                 influenced_list.append(user_id)
-                print user_id, checkIn_entry[1], user_list[user_id]['influenced_bit']
+                #print user_id, checkIn_entry[1], user_list[user_id]['influenced_bit']
         ind = ind + 1
 
 def filter_checkInList(start_time, end_time):
@@ -394,7 +464,7 @@ def F(pos):
     return len(influenced_list)
 
 #start = time.clock()
-F((0.09916773323165684, 0.3422742228921536))
+#F((0.09916773323165684, 0.3422742228921536))
 #print time.clock() - start
 
 #for influenced_user in influenced_list:

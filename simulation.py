@@ -186,16 +186,21 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
     initPro = getInitPro()
     if OFFLINE_EVENT:
         users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
+        print 'offline initial users :: ', users_region_list
     if ONLINE_EVENT:
         users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
+        print 'online initial users ::', users_online_region_list
     #print "length", len(users_region_list)
     #print "yo", len(user_list)
+    maxLogins = getMaxLogins(start_time, end_time)
+    print 'maxLogins in range :: ', maxLogins
     for user_id in users_online_region_list:
         numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
+        print 'number of Logins for %d is %d', (user_id, numberOfLogins)
         if NEG_INF:
-            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, user_list[user_id]['neg_interests_list'])
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins, user_list[user_id]['neg_interests_list'])
         else:
-            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins)
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins)
         if inf_prob!=0:
             #print "init_inf", inf_prob
             polarity = inf_prob/abs(inf_prob)
@@ -306,7 +311,20 @@ def getNumberOfLogins(user_id, start_time, end_time):
             count += 1
 
     return count
-    
+
+def getMaxLogins(start_time, end_time):
+    global checkIn_list
+    countDic = dict()
+    for checkIn_entry in checkIn_list:
+        if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            if checkIn_entry[0] not in countDic.keys():
+                countDic[checkIn_entry[0]] = 1
+            else:
+                countDic[checkIn_entry[0]] += 1
+
+    tupleMax = max(countDic.items(), key = lambda k: k[1])
+    return tupleMax[1]
+
 def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
     global checkIn_list
     newList = sorted(checkIn_list, key = itemgetter(0)) #TO DO improvement algorithmically : consume only required checkIn_list
@@ -464,7 +482,7 @@ def F(pos):
     return len(influenced_list)
 
 #start = time.clock()
-#F((0.09916773323165684, 0.3422742228921536))
+F((0.09916773323165684, 0.3422742228921536))
 #print time.clock() - start
 
 #for influenced_user in influenced_list:

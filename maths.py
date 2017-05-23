@@ -44,6 +44,12 @@ def interestMatchInf(eventType, userInterest, negUserInterest):
     i1 = i1 * polarity
     return i1*w1
 
+def numberOfLoginsInf(numberOfLogins, maximumValue):
+    global iMax2dash, init_pro
+    normalizedValue =  numberOfLogins/maximumValue
+    i2dash = influence(normalizedValue, iMax2dash)
+    return i2dash*w2dash
+
 def regionStayInf(stayTime):
     global  iMax2, init_pro
     normalizedStayTime = stayTime/init_pro
@@ -83,6 +89,21 @@ def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i2 = regionStayInf(stayTime)
     prob = newP(P1, i1, i2)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
+    return P
+
+def online_init_inf_prob(eventType, userInterest, numberOfLogins, maximumValue, negUserInterest = None):
+    #print 'init_inf_prob'
+    global P1, iMax1, iMax2dash
+    P1 = getP1()
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i2dash = regionStayInf(numberOfLogins, maximumValue)
+    prob = newP(P1, i1, i2dash)
     if prob > 1:
         P = min(prob, 1.)
     elif prob < -1:

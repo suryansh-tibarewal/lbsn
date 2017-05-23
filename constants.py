@@ -14,11 +14,13 @@ pw_on = True
 
 w1 = 1.
 w2 = 1.
+w2dash = 1.
 w3 = 1.
 w4  = 1.
 
 iMax1 = 3
 iMax2 = 1.5
+iMax2dash = 1.5
 iMax3 = 6
 c = 5
 init_pro = 0.02

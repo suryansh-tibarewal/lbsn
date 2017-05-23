@@ -3,10 +3,6 @@ from similarityMatrixGenerator import getInterestList
 from math import sqrt
 import pickle
 from math import isnan
-from constants import GOWALLA_DATASET, BRIGHTKITE_DATASET, NEG_INF
-import pprint
-
-pp = pprint.PrettyPrinter(indent = 4)
 
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
@@ -50,6 +46,7 @@ def soft_cosine(v1, v2, s):
 
 matrix = getSimilarityMatrix('similarityMatrix.txt')
 interestList = getInterestList('interests_list.txt')
+
 
 def get_soft_cosine2(v1, v2, negList = list()):
     global matrix, interestList

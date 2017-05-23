@@ -7,24 +7,15 @@ from math import isnan
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
 
-def getIndex(interest, interestList):
-    if interest not in interestList:
-        print interest + ' is not present in the list.\n'
-        exit(1)
-
-    ans = -1
-    for i in range(len(interestList)):
-        if interest is interestList[i]:
-            ans = i
-
-    return ans
-
-def vectorize(customList, interestList):
+def vectorize(userInterestList, interestList, negUserInterestList = list()):
     X = np.zeros(len(interestList))
 
-    for interest in customList:
+    for interest in userInterestList:
         i = interestList.index(interest)
         X[i] = 1.0
+    for interest in negUserInterestList:
+        i = interestList.index(interest)
+        X[i] = -1.0
 
     return X
 
@@ -47,8 +38,8 @@ def soft_cosine(v1, v2, s):
         exit(2)
 
     num = summation(v1, v2, s)
-    den1 = sqrt(summation(v1, v1, s))
-    den2 = sqrt(summation(v2, v2, s))
+    den1 = sqrt(abs(summation(v1, v1, s)))
+    den2 = sqrt(abs(summation(v2, v2, s)))
 
     res = num/(den1*den2)
     return res
@@ -56,19 +47,43 @@ def soft_cosine(v1, v2, s):
 matrix = getSimilarityMatrix('similarityMatrix.txt')
 interestList = getInterestList('interests_list.txt')
 
-def get_soft_cosine2(v1, v2):
+
+def get_soft_cosine2(v1, v2, negList = list()):
     global matrix, interestList
     X = vectorize(v1, interestList)
-    Y = vectorize(v2, interestList)
-    return soft_cosine(X, Y, matrix)
+    #print "eventType :: ", X
+    Y = vectorize(v2, interestList, negUserInterestList = negList)
+    #print "userVector :: ", Y
+    sc = soft_cosine(X, Y, matrix)
+    #print sc
+    return sc
 
-with open('softCosine.pickle', 'rb') as handle:
-    dic = pickle.load(handle)
+def getPickleDic(boolDataset):
+    if boolDataset == GOWALLA_DATASET:
+        with open('softCosine_GOWALLA.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    elif boolDataset == BRIGHTKITE_DATASET:
+        with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
+            return pickle.load(handle)
+    else:
+        print 'Invalid dataset chosen'
+        exit(1)
 
-def get_soft_cosine(userInterestList):
+dic = getPickleDic(BRIGHTKITE_DATASET)
+#pp.pprint(dic)
+def get_soft_cosine(userInterestList, negUserInterestList):
     global dic
-    key = hash(tuple(userInterestList))
+    if negUserInterestList is None:
+        key = tuple(userInterestList)
+    else:
+        key = tuple([tuple(userInterestList), tuple(negUserInterestList)])
+    #print 'hello'
+    #print userInterestList
+    #print negUserInterestList
+    #print dic[key]
     if isnan(dic[key]):
+        #print 'sc :: ' + str(0.0)
         return 0.0
     else:
+        #print 'sc :: ', dic[key]
         return dic[key]

@@ -19,33 +19,44 @@ global influenced_list, checkIn_list, n_users
 global initOn, osnOn, pwOn
 global initPro, addPro, eR0
 
-
-user_list = user_object.main(BRIGHTKITE_DATASET)
-
-def getUserList():
-    global user_list
-    return user_list
-
-
+#influenced_bit = 0
+user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET, NEG_ONLY) ####new value
+#print 8472 in user_list.keys()
+#if 8472 in user_list.keys():
+    #print "yo3"
 
 def social_check(checkIn_entry , influenced):
     global eventType
     user_id_receiver = checkIn_entry[0]
     checkIn_time = checkIn_entry[1]
     description_count = 0
+    neg_description_count = 0
     for user_id_sender in influenced:
         if not user_list[user_id_sender]['online_shared']:
             continue
         if(graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)):
             time_of_influence_sender = user_list[user_id_sender]['time_of_influence']
             if (time_of_influence_sender <= checkIn_time): # less than or less than equal to?
-                    description_count = description_count + 1
-    if description_count > 0:
+                    polarity = user_list[user_id_sender]['influenced_bit']
+                    if polarity == 1:
+                        description_count = description_count + 1
+                    elif polarity == -1:
+                        neg_description_count = neg_description_count + 1
+    #print description_count, neg_description_count
+    #if description_count > 0:   ####What is this ??????
+    if NEG_INF:
+        #print 'in NEG_INF1 :: ', user_list[user_id_receiver]['neg_interests_list']
+        rec_prob = osn_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], description_count, user_list[user_id_receiver]['neg_interests_list'], neg_description_count)
+    else:
         rec_prob = osn_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], description_count)
+    if rec_prob != 0:
+        #print "osn_inf_prob", rec_prob
+        polarity = rec_prob/abs(rec_prob)
+        rec_prob = abs(rec_prob)
         random_num = random.random()
         if random_num <= rec_prob:
-            return True
-    return False
+            return polarity
+    return 0
 
 def offline_edge(user_id_sender, checkIn_entry, ind):
     global checkIn_list
@@ -114,14 +125,22 @@ def physical_check(checkIn_entry , influenced, ind):
             if not sharedTimeCheck(user_id_sender, checkIn_entry[1]):
                 continue
             #print "step6"
-            isOnlineFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver)
-            rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isOnlineFriend)
-            random_num = random.random()
-            if random_num <= rec_prob:
-                #print "physical influence"
-                #exit(1)
-                return True
-    return False
+            isFriend = graph_object.checkUnDirectedEdge(user_id_sender, user_id_receiver) ##change this??
+            polarity = user_list[user_id_sender]['influenced_bit']
+            if NEG_INF:
+                rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isFriend, user_list[user_id_receiver]['neg_interests_list'], polarity)
+            else:
+                rec_prob = phy_inf_prob(eventType, user_list[user_id_receiver]['interests_list'], isFriend)
+            if rec_prob!=0:
+                #print "phy_inf_prob", rec_prob
+                polarity = rec_prob/abs(rec_prob)
+                rec_prob = abs(rec_prob)
+                random_num = random.random()
+                if random_num <= rec_prob:
+                    #print "physical influence"
+                    #exit(1)
+                    return polarity
+    return 0
 
 def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     global checkIn_list
@@ -141,27 +160,124 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     users_set.sort()
     return users_set
 
+def get_online_initial_users(start_time, end_time):
+    global checkIn_list
+    users_set = set()
+    cluster = get_cluster_user_list() #######################
+    count = 0
+    for checkIn_entry in checkIn_list:
+        user_id = checkIn_entry[0]
+        if user_id in users_set:
+            continue
+        if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            count = count + 1
+            #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
+            if user_id in cluster:
+                users_set.add(user_id)
+    print "check entries", count
+    users_set = list(users_set)
+    users_set.sort()
+    return users_set
+
 def initial_propogation(event_lon, event_lat, start_time, end_time):
     global eventType, influenced_list, user_list
     global initPro, eR0
     eR0 = getInitInfReg()
     initPro = getInitPro()
-    users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
-    print "length", len(users_region_list)
-    for user_id in users_region_list:
-        timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
-        inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
+    if OFFLINE_EVENT:
+        users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
+        print 'offline initial users :: ', users_region_list
+    if ONLINE_EVENT:
+        users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
+        print 'online initial users ::', users_online_region_list
+    #print "length", len(users_region_list)
+    #print "yo", len(user_list)
+    maxLogins = getMaxLogins(start_time, end_time)
+    print 'maxLogins in range :: ', maxLogins
+    for user_id in users_online_region_list:
+        numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
+        print 'number of Logins for %d is %d', (user_id, numberOfLogins)
+        if NEG_INF:
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins, user_list[user_id]['neg_interests_list'])
+        else:
+            inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins)
+        if inf_prob!=0:
+            #print "init_inf", inf_prob
+            polarity = inf_prob/abs(inf_prob)
+            inf_prob = abs(inf_prob)
         random_num = random.random() # between 0 to 1
         if random_num <= inf_prob:
-            user_list[user_id]['influenced_bit'] = 1
+            user_list[user_id]['influenced_bit'] = polarity
             user_list[user_id]['time_of_influence'] = end_time
             influenced_list.append(user_id)
-            online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+            #if user_list[user_id]['influenced_bit'] > 0:
+            if polarity==1:
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+            elif polarity==-1 :
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in osn_share"
+                exit(1)
+
             random_num = random.random() # between 0 to 1
             user_list[user_id]['physical_share_time_list'] = setGradientTimeList(end_time)
             if random_num <= online_share_prob:
                 user_list[user_id]['online_shared'] = 1
-            offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+            if polarity==1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+            elif polarity==-1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in offline_share"
+                exit(1)
+            random_num = random.random()
+            if random_num <= offline_share_prob:
+                user_list[user_id]['offline_shared'] = 1
+
+    for user_id in users_region_list:
+        timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
+        #print "user", user_id
+        #print "check", user_list[user_id]
+        if NEG_INF:
+            #print 'hin NEG_INF :: ', user_list[user_id]['neg_interests_list']
+            inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion, user_list[user_id]['neg_interests_list'])
+            #print 'hello2'
+        else:
+            #print 'not in NEG_INF :: ', user_list[user_id]['neg_interests_list']
+            inf_prob = init_inf_prob(eventType, user_list[user_id]['interests_list'], timeInRegion)
+        if inf_prob!=0:
+            #print "init_inf", inf_prob
+            polarity = inf_prob/abs(inf_prob)
+            inf_prob = abs(inf_prob)
+        random_num = random.random() # between 0 to 1
+        if random_num <= inf_prob:
+            user_list[user_id]['influenced_bit'] = polarity
+            user_list[user_id]['time_of_influence'] = end_time
+            influenced_list.append(user_id)
+            #if user_list[user_id]['influenced_bit'] > 0:
+            if polarity==1:
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+            elif polarity==-1 :
+                online_share_prob = osn_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in osn_share"
+                exit(1)
+            #elif user_list[user_id]['influenced_bit'] < 0:
+            #    online_share_prob = osn_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            #else:
+            #    print 'Error on calling online_share_prob in simulation.py'
+            #    exit(1)
+            random_num = random.random() # between 0 to 1
+            user_list[user_id]['physical_share_time_list'] = setGradientTimeList(end_time)
+            if random_num <= online_share_prob:
+                user_list[user_id]['online_shared'] = 1
+            if polarity==1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+            elif polarity==-1:
+                offline_share_prob = pw_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+            else:
+                print "polarity is screwed in simulation.py in offline_share"
+                exit(1)
             random_num = random.random()
             if random_num <= offline_share_prob:
                 user_list[user_id]['offline_shared'] = 1
@@ -186,6 +302,28 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     distance = eucledianDist(inside_point_x, inside_point_y, boundary_point_x, boundary_point_y)
     time = distance/speed
     return (timestamp_1 + time)
+
+def getNumberOfLogins(user_id, start_time, end_time):
+    global checkIn_list
+    count = 0
+    for checkIn_entry in checkIn_list:
+        if (checkIn_entry[0] == user_id) and (checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time):
+            count += 1
+
+    return count
+
+def getMaxLogins(start_time, end_time):
+    global checkIn_list
+    countDic = dict()
+    for checkIn_entry in checkIn_list:
+        if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
+            if checkIn_entry[0] not in countDic.keys():
+                countDic[checkIn_entry[0]] = 1
+            else:
+                countDic[checkIn_entry[0]] += 1
+
+    tupleMax = max(countDic.items(), key = lambda k: k[1])
+    return tupleMax[1]
 
 def stayTimeInRegion(xCen, yCen, r, E_t0, initPro, uid):
     global checkIn_list
@@ -229,13 +367,30 @@ def check(checkIn_entry, ind):
     status = getSwitchStatus()
     osnOn = status[1]
     pwOn = status[2]
-    influenced_bool = ((osnOn and social_check(checkIn_entry, influenced_list)) or (pwOn and physical_check(checkIn_entry, influenced_list, ind)))
-    if influenced_bool:
-        online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+    influenced_val = 0
+    if osnOn:
+        influenced_val = social_check(checkIn_entry, influenced_list)
+    if influenced_val==0 and pwOn:
+        influenced_val = physical_check(checkIn_entry, influenced_list, ind)
+    #influenced_bool = ((osnOn and social_check(checkIn_entry, influenced_list)) or (pwOn and physical_check(checkIn_entry, influenced_list, ind)))
+    if influenced_val!=0:
+        user_list[user_id]['influenced_bit'] = influenced_val
+        polarity = influenced_val
+        if polarity==1:
+            online_share_prob = osn_share_prob(eventType, user_list[user_id]['interests_list'])
+        elif polarity==-1:
+            online_share_prob = osn_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+        else:
+            print "polarity screwed in simulation.py online share"
         random_num = random.random() # between 0 to 1
         if random_num <= online_share_prob:
             user_list[user_id]['online_shared'] = 1
-        offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+        if polarity==1:
+            offline_share_prob = pw_share_prob(eventType, user_list[user_id]['interests_list']) #improvement: should have position too
+        elif polarity==-1:
+            offline_share_prob = pw_share_prob(eventType, user_list[user_id]['neg_interests_list'])
+        else:
+            print "polarity screwed in simulation.py offline share"
         random_num = random.random()
         if random_num <= offline_share_prob:
             user_list[user_id]['offline_shared'] = 1
@@ -251,12 +406,11 @@ def traverse():
         validity_status = checkIn_entry[5]
         if (validity_status==0 and  user_list[user_id]['influenced_bit']==0):
             if check(checkIn_entry, ind):
-                user_list[user_id]['influenced_bit'] = 1
                 user_list[user_id]['physical_share_time_list'] = setGradientTimeList(checkIn_entry[1])
                 user_list[user_id]['time_of_influence'] = checkIn_entry[1]
                 checkIn_entry[5] = 1
                 influenced_list.append(user_id)
-                print user_id, checkIn_entry[1]
+                #print user_id, checkIn_entry[1], user_list[user_id]['influenced_bit']
         ind = ind + 1
 
 def filter_checkInList(start_time, end_time):
@@ -283,6 +437,18 @@ def filter_checkInList(start_time, end_time):
     else :
         return 0, 0
 
+def printNodes(influenced_list):
+    global user_list
+    positive_count = 0
+    negative_count = 0
+    for influenced_node in influenced_list:
+        polarity = user_list[influenced_node]['influenced_bit']
+        if polarity<0:
+            negative_count = negative_count + 1
+        elif polarity>0:
+            positive_count = positive_count + 1
+    print "Positive Nodes: ", positive_count, ", Negative Nodes: ", negative_count
+
 def F(pos):
     random.seed(10)
     print "position", pos[0], pos[1]
@@ -305,18 +471,19 @@ def F(pos):
     influenced_list = list()
     if initOn:
         new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro)
-        print len(influenced_list)
+        printNodes(influenced_list)
     if new_influenced!=None:
         start_ind, end_ind = filter_checkInList(e_t0+initPro, e_t0+initPro+addPro)
         checkIn_list = checkIn_list[start_ind: end_ind + 1]
         #time.sleep(10)
         traverse()
-    print len(influenced_list)
+    #print len(influenced_list)
+    printNodes(influenced_list)
     return len(influenced_list)
 
-start = time.clock()
+#start = time.clock()
 F((0.09916773323165684, 0.3422742228921536))
-print time.clock() - start
+#print time.clock() - start
 
 #for influenced_user in influenced_list:
 #    print(str(influenced_user) , ':' , user_list[influenced_user]['time_of_influence'])

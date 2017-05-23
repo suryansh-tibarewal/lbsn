@@ -15,74 +15,144 @@ def influence(x, iMax):
     #print "inf", inf
     return inf
 
+def newP(baseP, i1, i2):
+    if i1 == 0 or i2 == 0:
+        return 0.
+
+    t1 = max(abs(i1), abs(i2))
+    t21 = min(abs(i1), abs(i2))
+    t22 = (float(i1*i2)) / (abs(i1*i2))
+    t2 = pow(t21, t22)
+    t3 = float(i1 + i2) / abs(i1 + i2)
+    P = baseP*t1*t2*t3
+    return P
+
 def jaccardCoeff(a, b):
     coeff = len(set(a) & set(b))/len(set(a) | set(b))
     return coeff
 
-def interestMatchInf(eventType, userInterest):
+def interestMatchInf(eventType, userInterest, negUserInterest):
+    #print 'interestMatchInf'
     global iMax1
     #jaccCoeff = jaccardCoeff(eventType, userInterest)
-    softCoeff = get_soft_cosine(userInterest)
-    #print softCoeff
-    i1 = influence(softCoeff, iMax1)
-    return i1
+
+    softCoeff = get_soft_cosine(userInterest, negUserInterest)
+    polarity = 1
+    if softCoeff != 0:
+        polarity = softCoeff/abs(softCoeff)
+    i1 = influence(abs(softCoeff), iMax1)
+    i1 = i1 * polarity
+    return i1*w1
+
+def numberOfLoginsInf(numberOfLogins, maximumValue):
+    global iMax2dash, init_pro
+    normalizedValue =  numberOfLogins/maximumValue
+    i2dash = influence(normalizedValue, iMax2dash)
+    return i2dash*w2dash
 
 def regionStayInf(stayTime):
     global  iMax2, init_pro
     normalizedStayTime = stayTime/init_pro
     i2 = influence(normalizedStayTime, iMax2)
-    return i2
+    return i2*w2
 
-def recievedCopiesInf(descriptionCount):
+def recievedCopiesInf(descriptionCount, negDescriptionCount):
     global iMax3, maxDescriptionCount
-    exp = (descriptionCount - 1)/maxDescriptionCount
-    i3 = influence(min(exp, 1), iMax3)
-    return i3
-
-def friendInf(isFriend):
-    global c
-    if isFriend:
-        return c
+    if negDescriptionCount is None:
+        if descriptionCount == 0:
+            return 0.0
+        exp = float(descriptionCount - 1)/maxDescriptionCount
     else:
-        return 1
+        if descriptionCount == 0 and negDescriptionCount == 0:
+            return 0.0
+        exp = float(descriptionCount - negDescriptionCount)/maxDescriptionCount
+    polarity = 1
+    if exp != 0:
+        polarity = exp/abs(exp)
+    exp = abs(exp)
+    i3 = influence(min(exp, 1), iMax3)
+    return i3*w3*polarity
 
-def init_inf_prob(eventType, userInterest, stayTime):
+def friendInf(isFriend, friendPolarity):
+    global c
+    if friendPolarity is None:
+       friendPolarity = 1
+    if isFriend:
+        return friendPolarity*c*w4
+    else:
+        return friendPolarity*1*w4
+
+def init_inf_prob(eventType, userInterest, stayTime, negUserInterest = None):
+    #print 'init_inf_prob'
     global P1, iMax1, iMax2
     P1 = getP1()
-    i1 = interestMatchInf(eventType, userInterest)
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
     i2 = regionStayInf(stayTime)
-    P = min(P1*i1*i2, 1)
+    prob = newP(P1, i1, i2)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
+    return P
+
+def online_init_inf_prob(eventType, userInterest, numberOfLogins, maximumValue, negUserInterest = None):
+    #print 'init_inf_prob'
+    global P1, iMax1, iMax2dash
+    P1 = getP1()
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i2dash = regionStayInf(numberOfLogins, maximumValue)
+    prob = newP(P1, i1, i2dash)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 def osn_share_prob(eventType, userInterest):
     global P2, iMax1
     P2 = getP2()
-    i1 = interestMatchInf(eventType, userInterest)
+    i1 = interestMatchInf(eventType, userInterest, None)
     P = min(P2*i1, 1)
     return P
 
-def osn_inf_prob(eventType, userInterest, descriptionCount):
+def osn_inf_prob(eventType, userInterest, descriptionCount, negUserInterest = None, negDescriptionCount = None):
     global P3, iMax1, iMax3
     P3 = getP3()
-    i1 = interestMatchInf(eventType, userInterest)
-    i3 = recievedCopiesInf(descriptionCount)
-    P = min(P3*i1*i3, 1)
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i3 = recievedCopiesInf(descriptionCount, negDescriptionCount)
+    prob = newP(P1, i1, i3)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 
 def pw_share_prob(eventType, userInterest):
     global P4, iMax1
     P4 = getP4()
-    i1 = interestMatchInf(eventType, userInterest)
+    i1 = interestMatchInf(eventType, userInterest, None)
     P = min(P4*i1, 1)
     return P
 
-def phy_inf_prob(eventType, userInterest, isFriend):
+def phy_inf_prob(eventType, userInterest, isFriend, negUserInterest = None, friendPolarity = None):
     global P5, iMax1
     P5 = getP5()
-    i1 = interestMatchInf(eventType, userInterest)
-    i4 = friendInf(isFriend)
-    P = min(P5*i1*i4, 1)
+    i1 = interestMatchInf(eventType, userInterest, negUserInterest)
+    i4 = friendInf(isFriend, friendPolarity)
+    prob = newP(P1, i1, i4)
+    if prob > 1:
+        P = min(prob, 1.)
+    elif prob < -1:
+        P = max(prob, -1.)
+    else:
+        P = prob
     return P
 
 

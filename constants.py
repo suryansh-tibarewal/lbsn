@@ -1,3 +1,10 @@
+NEG_INF = True
+NEG_ONLY = False
+
+ONLINE_EVENT = True
+OFFLINE_EVENT = True
+
+
 BRIGHTKITE_DATASET = 0
 GOWALLA_DATASET = 1
 
@@ -5,16 +12,22 @@ init_on = True
 osn_on = True
 pw_on = True
 
+w1 = 1.
+w2 = 1.
+w2dash = 1.
+w3 = 1.
+w4  = 1.
 
 iMax1 = 3
 iMax2 = 1.5
+iMax2dash = 1.5
 iMax3 = 6
 c = 5
 init_pro = 0.02
 add_pro = 0.2
-maxDescriptionCount = 10
+maxDescriptionCount = 10.
 e_t0 = 0.5
-e_r0 = 0.01
+e_r0 = 0.1
 
 e_lat = 0.3422742228921536
 e_lon = 0.09916773323165684
@@ -22,7 +35,7 @@ e_lon = 0.09916773323165684
 
 eventType = ['Painting', 'Ballooning', 'Surfing']
 # p should lie between 0 and 2/3
-p = 0.3
+p = 0.2
 p1 = p
 p2 = 1.5*p
 p3 = 1.5*p

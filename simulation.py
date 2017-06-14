@@ -9,7 +9,7 @@ import time
 from operator import itemgetter
 from return_pos_time import get_pos
 import return_pos_time
-
+from clustering import get_clusters, get_optimal_cluster
 
 
 random.seed(10)
@@ -163,7 +163,9 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
 def get_online_initial_users(start_time, end_time):
     global checkIn_list
     users_set = set()
-    cluster = [54079, 54040, 19684, 5593] ####get_cluster_user_list() #######################
+    clusters = get_clusters(BRIGHTKITE_DATASET)
+    cluster = get_optimal_cluster(clusters)
+    print cluster
     count = 0
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]

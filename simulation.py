@@ -3,7 +3,7 @@ import user_object
 from user_object import setGradientTimeList
 from constants import *
 import graph_object
-from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion, init_inf_prob, eucledianDist
+from maths import osn_share_prob, osn_inf_prob, pw_share_prob, phy_inf_prob, insideRegion, online_init_inf_prob, init_inf_prob, eucledianDist
 import random
 import time
 from operator import itemgetter
@@ -163,7 +163,7 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
 def get_online_initial_users(start_time, end_time):
     global checkIn_list
     users_set = set()
-    cluster = get_cluster_user_list() #######################
+    cluster = [54079, 54040, 19684, 5593] ####get_cluster_user_list() #######################
     count = 0
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]
@@ -171,6 +171,7 @@ def get_online_initial_users(start_time, end_time):
             continue
         if checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time:
             count = count + 1
+            #print user_id
             #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
             if user_id in cluster:
                 users_set.add(user_id)
@@ -184,19 +185,20 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
     global initPro, eR0
     eR0 = getInitInfReg()
     initPro = getInitPro()
+    users_region_list = list()
+    users_online_region_list = list()
     if OFFLINE_EVENT:
         users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
         print 'offline initial users :: ', users_region_list
     if ONLINE_EVENT:
         users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
         print 'online initial users ::', users_online_region_list
-    #print "length", len(users_region_list)
-    #print "yo", len(user_list)
-    maxLogins = getMaxLogins(start_time, end_time)
-    print 'maxLogins in range :: ', maxLogins
+        maxLogins = getMaxLogins(start_time, end_time)
+        print 'maxLogins in range :: ', maxLogins
+
     for user_id in users_online_region_list:
         numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
-        print 'number of Logins for %d is %d', (user_id, numberOfLogins)
+        print 'number of Logins for ' + str(user_id) + ' is ' + str(numberOfLogins)
         if NEG_INF:
             inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins, user_list[user_id]['neg_interests_list'])
         else:
@@ -205,7 +207,10 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             #print "init_inf", inf_prob
             polarity = inf_prob/abs(inf_prob)
             inf_prob = abs(inf_prob)
+        print 'polarity for ' + str(user_id) + 'is :: ' + str(polarity)
+        print 'inf_prob for ' + str(user_id) + 'is :: ' + str(inf_prob)
         random_num = random.random() # between 0 to 1
+        print 'random number for ' + str(user_id) + 'is :: ' + str(random_num)
         if random_num <= inf_prob:
             user_list[user_id]['influenced_bit'] = polarity
             user_list[user_id]['time_of_influence'] = end_time
@@ -303,13 +308,12 @@ def getTimeStampRegion(xCen, yCen, r, inside_point_x, inside_point_y, timestamp_
     time = distance/speed
     return (timestamp_1 + time)
 
-def getNumberOfLogins(user_id, start_time, end_time):
+def getNumberOfLogins(start_time, end_time, user_id):
     global checkIn_list
     count = 0
     for checkIn_entry in checkIn_list:
-        if (checkIn_entry[0] == user_id) and (checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time):
+        if (checkIn_entry[0] == int(user_id)) and (checkIn_entry[1]>=start_time and checkIn_entry[1]<=end_time):
             count += 1
-
     return count
 
 def getMaxLogins(start_time, end_time):

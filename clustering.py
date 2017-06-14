@@ -2,9 +2,11 @@ import mcl_clustering
 import numpy as np
 import networkx as nx
 from collections import defaultdict
-from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
+from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET , eventType
 import pickle
-
+from similarityMatrixGenerator import getInterestList
+from similarity import getSimilarityMatrix
+import numpy as np
 
 
 def get_clusters(dataset_type):
@@ -48,5 +50,44 @@ def get_clusters(dataset_type):
         return clusters
 
 
-def get_optimal_cluster(clusters):
-	return clusters[0]
+def Gauss(a):
+    return 0.5
+
+
+def get_optimal_cluster(clusters,dataset_type):
+    groups = []
+    ranking = []
+    for cluster in clusters:
+        if clusters[cluster] not in groups:
+             groups.append(clusters[cluster])
+
+	user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET,NEG_ONLY)
+    intrest_list = getInterestList('interests.txt')
+    event_interest_count = [0]*len(interest_list)
+    for eventType in eventType:
+        event_interest_count[interest_list.index(eventType)]+=1
+    group_intrest_count = [0]*len(intrest_list)
+    similarityMatrix = getSimilarityMatrix('similarityMatrix.txt')
+
+    for group in groups:
+        num = 0
+        for user in group:
+            pos = user_list[user]['interests_list']
+            neg = user_list[user]['neg_interests_list']
+            for p in pos:
+                group_interest_count[interest_list.index(p)]+=1
+            for n in neg:
+                group_interest_count[interest_list.index(n)]-=1
+
+        for i in range (1,len(intrest_list)):
+            for j in range (1,len(interest_list)):
+                num += similarityMatrix[i][j]*group_interest_count[i]*event_interest_count[j]
+
+        val = num/len(group)*Gauss(len(group))
+
+        ranking.append([val,group])
+    ranking.sort()
+    return ranking[:5]
+
+clusters = get_clusters(BRIGHTKITE_DATASET)
+get_optimal_cluster(clusters,BRIGHTKITE_DATASET)

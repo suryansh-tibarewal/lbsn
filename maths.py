@@ -102,7 +102,7 @@ def online_init_inf_prob(eventType, userInterest, numberOfLogins, maximumValue, 
     global P1, iMax1, iMax2dash
     P1 = getP1()
     i1 = interestMatchInf(eventType, userInterest, negUserInterest)
-    i2dash = regionStayInf(numberOfLogins, maximumValue)
+    i2dash = numberOfLoginsInf(numberOfLogins, maximumValue)
     prob = newP(P1, i1, i2dash)
     if prob > 1:
         P = min(prob, 1.)

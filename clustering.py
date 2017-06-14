@@ -2,15 +2,20 @@ import mcl_clustering
 import numpy as np
 import networkx as nx
 from collections import defaultdict
+from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET
 import pickle
 
 
 
 def get_clusters(dataset_type):
     try:
-        with open("clusters.pickle", "rb") as f:
-            cluster = pickle.load(f)
-        return cluster
+        if dataset_type == 0:
+            with open('clusters_BRIGHTKITE_DATASET.pickle', "rb") as f:
+                clusters = pickle.load(f)
+        else:
+            with open('clusters_GOWALLA_DATASET.pickle', 'rb') as f:
+                clusters = pickle.load(f)
+        return clusters
 
     except:
         G = nx.Graph()
@@ -34,6 +39,14 @@ def get_clusters(dataset_type):
                 G.add_edge(from_edge,to_edge)
         edgeList.close()
         M , clusters = mcl_clustering.networkx_mcl(G)
-        with open("clusters.pickle", "wb") as f:
-            pickle.dump(clusters, f)
+        if dataset_type == 0:
+            with open("clusters_BRIGHTKITE_DATASET.pickle", "wb") as f:
+                pickle.dump(clusters, f)
+        else:
+            with open("clusters_GOWALLA_DATASET.pickle", "wb") as f:
+                pickle.dump(clusters, f)
         return clusters
+
+
+def get_optimal_cluster(clusters):
+	return clusters[0]

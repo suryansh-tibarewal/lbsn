@@ -46,6 +46,17 @@ rp = 0.01
 
 buffer_time = 0.000000001
 
+
+####    weights given to intrest in online pos calculation
+pos_interest_mul = 4
+neg_interest_mul = 1
+
+
+
+####   GAUSSSIAN CONST.
+mean = 20
+standard_dev = 2
+
 def recalculateProbs():
     global p, p1, p2, p3, p4, p5
     p1 = p
@@ -54,12 +65,12 @@ def recalculateProbs():
     p4 = 1.5*p
     p5 = 1.5*p
     #print p, p1
-    print p, p1, p2, p3, p4, p5
+    print (p, p1, p2, p3, p4, p5)
 
 def setP(value):
     global p
     if value < 0 or value > 2.0/3:
-        print 'Influencing prob shoulb be between 0 and 2/3'
+        print ('Influencing prob shoulb be between 0 and 2/3')
         exit(1)
     p = value
     recalculateProbs()

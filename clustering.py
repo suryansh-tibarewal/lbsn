@@ -2,11 +2,12 @@ import mcl_clustering
 import numpy as np
 import networkx as nx
 from collections import defaultdict
-from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET , eventType
+from constants import BRIGHTKITE_DATASET, GOWALLA_DATASET ,eventType , NEG_ONLY , mean,pos_interest_mul , neg_interest_mul
 import pickle
 from similarityMatrixGenerator import getInterestList
 from similarity import getSimilarityMatrix
 import numpy as np
+import user_object
 
 
 def get_clusters(dataset_type):
@@ -37,7 +38,6 @@ def get_clusters(dataset_type):
             if to_edge not in L:
                 G.add_node(to_edge)
                 L.append(to_edge)
-
                 G.add_edge(from_edge,to_edge)
         edgeList.close()
         M , clusters = mcl_clustering.networkx_mcl(G)
@@ -47,47 +47,87 @@ def get_clusters(dataset_type):
         else:
             with open("clusters_GOWALLA_DATASET.pickle", "wb") as f:
                 pickle.dump(clusters, f)
+
+        ####### USERS pickle
+        if dataset_type == 0:
+            with open("clusters_BRIGHTKITE_DATASET_graph.pickle", "wb") as f:
+                pickle.dump(G , f)
+        else:
+            with open("clusters_GOWALLA_DATASET_graph.pickle", "wb") as f:
+                pickle.dump(G , f)
         return clusters
 
 
-def Gauss(a):
-    return 0.5
+def gaussian(x):
+    standard_dev = 2
+    return np.exp(-np.power(x - mean, 2.) / (2 * np.power(standard_dev, 2.)))
 
+def get_optimal_cluster(clusters,eventType):
+    user_map = getusers()
+    groups = get_cluster_groups(user_map,clusters)
 
-def get_optimal_cluster(clusters,dataset_type):
-    groups = []
     ranking = []
-    for cluster in clusters:
-        if clusters[cluster] not in groups:
-             groups.append(clusters[cluster])
-
-	user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET,NEG_ONLY)
-    intrest_list = getInterestList('interests.txt')
+    user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET)
+    interest_list = getInterestList('interests_list.txt')
     event_interest_count = [0]*len(interest_list)
+
     for eventType in eventType:
         event_interest_count[interest_list.index(eventType)]+=1
-    group_intrest_count = [0]*len(intrest_list)
+
     similarityMatrix = getSimilarityMatrix('similarityMatrix.txt')
 
     for group in groups:
+        group_interest_count = [0]*len(interest_list)
         num = 0
         for user in group:
             pos = user_list[user]['interests_list']
             neg = user_list[user]['neg_interests_list']
             for p in pos:
-                group_interest_count[interest_list.index(p)]+=1
+                group_interest_count[interest_list.index(p)]+=pos_interest_mul
             for n in neg:
-                group_interest_count[interest_list.index(n)]-=1
+                group_interest_count[interest_list.index(n)]-=neg_interest_mul
 
-        for i in range (1,len(intrest_list)):
-            for j in range (1,len(interest_list)):
+        # for index,inter in enumerate(group_interest_count):
+        #     if(event_interest_count[index]>0):
+        #         print (inter)
+        for i in range (len(interest_list)):
+            for j in range (len(interest_list)):
                 num += similarityMatrix[i][j]*group_interest_count[i]*event_interest_count[j]
 
-        val = num/len(group)*Gauss(len(group))
+        val = (num*gaussian(len(group)))/len(group)
 
         ranking.append([val,group])
     ranking.sort()
     return ranking[:5]
 
+def getusers():
+    G = nx.Graph()
+    with open('clusters_BRIGHTKITE_DATASET_graph.pickle', "rb") as f:
+        G = pickle.load(f)
+    S = []
+    for user in G.nodes():
+        S.append(user)
+    return S
+
+def get_cluster_groups(user_map,clusters):
+    S = []
+    for cluster in clusters:
+        R=[]
+        for member in clusters[cluster]:
+            R.append(user_map[member])
+        if R not in S:
+            S.append(R)
+    return S
+
 clusters = get_clusters(BRIGHTKITE_DATASET)
-get_optimal_cluster(clusters,BRIGHTKITE_DATASET)
+
+S = []
+
+# for cluster in clusters:
+#     for user in clusters[cluster]:
+#         if user not in S:
+#             S.append(user)
+# print (len(S))
+#print (gaussian(19))
+
+print(get_optimal_cluster(clusters,['Aquariums','Biking','Ceramics']))

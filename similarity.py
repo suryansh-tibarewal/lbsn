@@ -3,6 +3,7 @@ from similarityMatrixGenerator import getInterestList
 from math import sqrt
 import pickle
 from math import isnan
+from constants import BRIGHTKITE_DATASET,GOWALLA_DATASET
 
 def getSimilarityMatrix(fileName):
     return np.loadtxt(fileName)
@@ -31,10 +32,10 @@ def summation(v1, v2, s):
 
 def soft_cosine(v1, v2, s):
     if type(s).__module__ != np.__name__:
-        print 'Matrix is not a numpy array.\n'
+        #print 'Matrix is not a numpy array.\n'
         exit(3)
     if(len(v1) != len(v2)):
-        print 'Length to 2 vectors should be same.\n'
+        #print 'Length to 2 vectors should be same.\n'
         exit(2)
 
     num = summation(v1, v2, s)
@@ -64,9 +65,13 @@ def getPickleDic(boolDataset):
             return pickle.load(handle)
     elif boolDataset == BRIGHTKITE_DATASET:
         with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
-            return pickle.load(handle)
+            return pickle.load(handle,encoding='latin1')
+
+    # elif boolDataset == BRIGHTKITE_DATASET:
+    #     with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
+    #         return pickle.load(handle)
     else:
-        print 'Invalid dataset chosen'
+        #print 'Invalid dataset chosen'
         exit(1)
 
 dic = getPickleDic(BRIGHTKITE_DATASET)

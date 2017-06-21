@@ -120,7 +120,7 @@ def getUserListFromFile(boolDataset):
         with open('user_list_BRIGHTKITE_DATASET.pickle', 'rb') as handle:
             return pickle.load(handle)
     else:
-        print 'Invalid dataset chosen.'
+        print ('Invalid dataset chosen.')
         exit(2)
 
 #print 0 is 1

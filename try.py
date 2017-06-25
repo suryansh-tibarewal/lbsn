@@ -16,7 +16,7 @@ popular_interests_list = [0]*len(interest_list)
 neg_popular_interests_list = [0]*len(interest_list)
 similarityMatrix = getSimilarityMatrix('similarityMatrix.txt')
 event_interest_count = [0]*len(interest_list)
-eventType = ['Classes']
+eventType = ['Classes','Skill']
 for eventType in eventType:
     event_interest_count[interest_list.index(eventType)]+=1
 
@@ -56,4 +56,5 @@ print (group_interest_count)
 for i in range (len(interest_list)):
     for j in range (len(interest_list)):
         num += similarityMatrix[i][j]*group_interest_count[i]*event_interest_count[j]
+
 print (num)

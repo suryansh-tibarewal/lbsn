@@ -97,7 +97,7 @@ def get_optimal_cluster(clusters,eventType):
         val = (num*gaussian(len(group)))/len(group)
 
         ranking.append([val,group])
-    ranking.sort()
+    ranking.sort(reverse=True)
     return ranking[:5]
 
 def getusers():

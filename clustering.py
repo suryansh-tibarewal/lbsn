@@ -43,18 +43,18 @@ def get_clusters(dataset_type):
         M , clusters = mcl_clustering.networkx_mcl(G)
         if dataset_type == 0:
             with open("clusters_BRIGHTKITE_DATASET.pickle", "wb") as f:
-                pickle.dump(clusters, f)
+                pickle.dump(clusters, f,2)
         else:
             with open("clusters_GOWALLA_DATASET.pickle", "wb") as f:
-                pickle.dump(clusters, f)
+                pickle.dump(clusters, f,2)
 
         ####### USERS pickle
         if dataset_type == 0:
             with open("clusters_BRIGHTKITE_DATASET_graph.pickle", "wb") as f:
-                pickle.dump(G , f)
+                pickle.dump(G , f,2)
         else:
             with open("clusters_GOWALLA_DATASET_graph.pickle", "wb") as f:
-                pickle.dump(G , f)
+                pickle.dump(G , f,2)
         return clusters
 
 

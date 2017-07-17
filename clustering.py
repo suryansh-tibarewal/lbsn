@@ -62,7 +62,8 @@ def gaussian(x):
     standard_dev = 2
     return np.exp(-np.power(x - mean, 2.) / (2 * np.power(standard_dev, 2.)))
 
-def get_optimal_cluster(clusters,eventType):
+def get_optimal_clusters(clusters):
+    global eventType
     user_map = getusers()
     groups = get_cluster_groups(user_map,clusters)
 
@@ -98,7 +99,17 @@ def get_optimal_cluster(clusters,eventType):
 
         ranking.append([val,group])
     ranking.sort(reverse=True)
-    return ranking[:5]
+    return ranking
+
+def get_top_cluster(dataset_type, rank):
+    clusters = get_clusters(dataset_type)
+    optimal_clusters = get_optimal_clusters(clusters)
+    if rank < 0 and rank >= len(optimal_clusters):
+        print 'Wrong rank passed in get_top_cluster\n'
+        exit(1)
+
+    return optimal_clusters[rank]
+
 
 def getusers():
     G = nx.Graph()
@@ -119,9 +130,9 @@ def get_cluster_groups(user_map,clusters):
             S.append(R)
     return S
 
-clusters = get_clusters(BRIGHTKITE_DATASET)
+#clusters = get_clusters(BRIGHTKITE_DATASET)
 
-S = []
+#S = []
 
 # for cluster in clusters:
 #     for user in clusters[cluster]:
@@ -130,4 +141,4 @@ S = []
 # print (len(S))
 #print (gaussian(19))
 
-print(get_optimal_cluster(clusters,['Aquariums','Biking','Ceramics']))
+#print(get_optimal_cluster(clusters))

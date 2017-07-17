@@ -46,6 +46,16 @@ rp = 0.01
 
 buffer_time = 0.000000001
 
+temp = 0
+
+def setTemp(value):
+    global temp
+    temp = value
+
+def getTemp():
+    global temp
+    return temp
+
 
 ####    weights given to intrest in online pos calculation
 pos_interest_mul = 4

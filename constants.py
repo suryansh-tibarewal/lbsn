@@ -23,10 +23,10 @@ iMax2 = 1.5
 iMax2dash = 1.5
 iMax3 = 6
 c = 5
-init_pro = 0.02
-add_pro = 0.2
+init_pro = 0.02 #0.0909090909
+add_pro = 0.2 #0.909090909
 maxDescriptionCount = 10.
-e_t0 = 0.5
+e_t0 = 0.4
 e_r0 = 0.1
 
 e_lat = 0.3422742228921536

@@ -65,7 +65,7 @@ def getPickleDic(boolDataset):
             return pickle.load(handle)
     elif boolDataset == BRIGHTKITE_DATASET:
         with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:
-            return pickle.load(handle,encoding='latin1')
+            return pickle.load(handle)
 
     # elif boolDataset == BRIGHTKITE_DATASET:
     #     with open('softCosine_BRIGHTKITE.pickle', 'rb') as handle:

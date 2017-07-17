@@ -9,7 +9,7 @@ import time
 from operator import itemgetter
 from return_pos_time import get_pos
 import return_pos_time
-from clustering import get_clusters, get_optimal_cluster
+from clustering import get_clusters, get_optimal_clusters, get_top_cluster
 
 
 random.seed(10)
@@ -20,7 +20,7 @@ global initOn, osnOn, pwOn
 global initPro, addPro, eR0
 
 #influenced_bit = 0
-user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET, NEG_ONLY) ####new value
+user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET) ####new value
 #print 8472 in user_list.keys()
 #if 8472 in user_list.keys():
     #print "yo3"
@@ -160,12 +160,14 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     users_set.sort()
     return users_set
 
-def get_online_initial_users(start_time, end_time):
+def get_online_initial_users(start_time, end_time, cluster_rank):
     global checkIn_list
     users_set = set()
-    clusters = get_clusters(BRIGHTKITE_DATASET)
-    cluster = get_optimal_cluster(clusters)
-    print cluster
+    cluster = get_top_cluster(BRIGHTKITE_DATASET, cluster_rank)
+    cluster_score = cluster[0]
+    cluster_ids = cluster[1]
+    print 'cluster_score :: ', cluster_score
+    print 'cluster size :: ', len(cluster_ids)
     count = 0
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]
@@ -175,14 +177,14 @@ def get_online_initial_users(start_time, end_time):
             count = count + 1
             #print user_id
             #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
-            if user_id in cluster:
+            if user_id in cluster_ids:
                 users_set.add(user_id)
     print "check entries", count
     users_set = list(users_set)
     users_set.sort()
     return users_set
 
-def initial_propogation(event_lon, event_lat, start_time, end_time):
+def initial_propogation(event_lon, event_lat, start_time, end_time, rank):
     global eventType, influenced_list, user_list
     global initPro, eR0
     eR0 = getInitInfReg()
@@ -193,7 +195,10 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
         print 'offline initial users :: ', users_region_list
     if ONLINE_EVENT:
-        users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
+        if rank == -1:
+            print 'Cluster rank cannot be -1 when ONLINE_EVENT is on.\n'
+            exit(1)
+        users_online_region_list = get_online_initial_users(start_time, end_time, rank) #add parameter for cluster number later
         print 'online initial users ::', users_online_region_list
         maxLogins = getMaxLogins(start_time, end_time)
         print 'maxLogins in range :: ', maxLogins
@@ -455,7 +460,7 @@ def printNodes(influenced_list):
             positive_count = positive_count + 1
     print "Positive Nodes: ", positive_count, ", Negative Nodes: ", negative_count
 
-def F(pos):
+def F(pos, rank=-1):
     random.seed(10)
     print "position", pos[0], pos[1]
     global influenced_list, checkIn_list, user_list, n_users
@@ -476,7 +481,7 @@ def F(pos):
     n_users = len(user_list)
     influenced_list = list()
     if initOn:
-        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro)
+        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro, rank)
         printNodes(influenced_list)
     if new_influenced!=None:
         start_ind, end_ind = filter_checkInList(e_t0+initPro, e_t0+initPro+addPro)

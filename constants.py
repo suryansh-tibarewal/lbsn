@@ -26,7 +26,7 @@ c = 5
 init_pro = 0.02 #0.0909090909
 add_pro = 0.2 #0.909090909
 maxDescriptionCount = 10.
-e_t0 = 0.4
+e_t0 = 0.5
 e_r0 = 0.1
 
 e_lat = 0.3422742228921536
@@ -35,7 +35,7 @@ e_lon = 0.09916773323165684
 
 eventType = ['Painting', 'Ballooning', 'Surfing']
 # p should lie between 0 and 2/3
-p = 0.2
+p = 0.42
 p1 = p
 p2 = 1.5*p
 p3 = 1.5*p

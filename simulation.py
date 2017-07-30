@@ -198,14 +198,16 @@ def initial_propogation(event_lon, event_lat, start_time, end_time, cluster_set)
         if cluster_set is None:
             print 'cluster_set cannot be None when ONLINE_EVENT is on.\n'
             exit(1)
-        users_online_region_list = get_online_initial_users(start_time, end_time, cluster_set) #add parameter for cluster number later
+        users_online_region_list = get_online_initial_users(0, 1, cluster_set) #add parameter for cluster number later
         print 'online initial users ::', users_online_region_list
         maxLogins = getMaxLogins(start_time, end_time)
         print 'maxLogins in range :: ', maxLogins
-
+    count = 0
     for user_id in users_online_region_list:
         numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
-        print 'number of Logins for ' + str(user_id) + ' is ' + str(numberOfLogins)
+        if numberOfLogins > 0:
+            count = count + 1
+        #print 'number of Logins for ' + str(user_id) + ' is ' + str(numberOfLogins)
         if NEG_INF:
             inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins, user_list[user_id]['neg_interests_list'])
         else:
@@ -245,7 +247,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time, cluster_set)
             random_num = random.random()
             if random_num <= offline_share_prob:
                 user_list[user_id]['offline_shared'] = 1
-
+    print count
     for user_id in users_region_list:
         timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
         #print "user", user_id
@@ -458,12 +460,14 @@ def printNodes(influenced_list):
             negative_count = negative_count + 1
         elif polarity>0:
             positive_count = positive_count + 1
+    temp = 1
     if temp == 1:
-        f = open('cluster_execution_results.txt', 'a')
-        f.write('[' + positive_count + ', ' + negative_count + ']')
+        print str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count))
+        f = open('cluster_execution_results_jacc.txt', 'a')
+        f.write(str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count)) + '\n')
         f.close()
         return
-    print "Positive Nodes: ", positive_count, ", Negative Nodes: ", negative_count
+    return str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count))
 
 def F(pos, cluster_set = None):
     random.seed(10)
@@ -494,11 +498,11 @@ def F(pos, cluster_set = None):
         #time.sleep(10)
         traverse()
     #print len(influenced_list)
-    printNodes(influenced_list)
-    return len(influenced_list)
+    return printNodes(influenced_list)
+    #return len(influenced_list)
 
 #start = time.clock()
-F((0.09916773323165684, 0.3422742228921536))
+#F((0.09916773323165684, 0.3422742228921536))
 #print time.clock() - start
 
 #for influenced_user in influenced_list:

@@ -34,13 +34,14 @@ def jaccardCoeff(a, b):
 def interestMatchInf(eventType, userInterest, negUserInterest):
     #print 'interestMatchInf'
     global iMax1
-    #jaccCoeff = jaccardCoeff(eventType, userInterest)
+    jaccCoeff = jaccardCoeff(eventType, userInterest)
 
-    softCoeff = get_soft_cosine(userInterest, negUserInterest)
+    #softCoeff = get_soft_cosine(userInterest, negUserInterest)
     polarity = 1
-    if softCoeff != 0:
-        polarity = softCoeff/abs(softCoeff)
-    i1 = influence(abs(softCoeff), iMax1)
+    #if softCoeff != 0:
+    #    polarity = softCoeff/abs(softCoeff)
+    #i1 = influence(abs(softCoeff), iMax1)
+    i1 = influence(abs(jaccCoeff), iMax1)
     i1 = i1 * polarity
     return i1*w1
 

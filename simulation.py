@@ -9,7 +9,7 @@ import time
 from operator import itemgetter
 from return_pos_time import get_pos
 import return_pos_time
-from clustering import get_clusters, get_optimal_cluster
+from clustering import get_clusters, get_optimal_clusters, get_top_cluster
 
 
 random.seed(10)
@@ -20,7 +20,7 @@ global initOn, osnOn, pwOn
 global initPro, addPro, eR0
 
 #influenced_bit = 0
-user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET, NEG_ONLY) ####new value
+user_list = user_object.getUserListFromFile(BRIGHTKITE_DATASET) ####new value
 #print 8472 in user_list.keys()
 #if 8472 in user_list.keys():
     #print "yo3"
@@ -160,12 +160,14 @@ def get_initial_users(event_lon, event_lat, rp, start_time, end_time):
     users_set.sort()
     return users_set
 
-def get_online_initial_users(start_time, end_time):
+def get_online_initial_users(start_time, end_time, cluster_set):
     global checkIn_list
     users_set = set()
-    clusters = get_clusters(BRIGHTKITE_DATASET)
-    cluster = get_optimal_cluster(clusters)
-    print cluster
+    #cluster = get_top_cluster(BRIGHTKITE_DATASET, cluster_rank)
+    cluster_score = cluster_set[0]
+    cluster_ids = cluster_set[1]
+    print 'cluster_score :: ', cluster_score
+    print 'cluster size :: ', len(cluster_ids)
     count = 0
     for checkIn_entry in checkIn_list:
         user_id = checkIn_entry[0]
@@ -175,14 +177,14 @@ def get_online_initial_users(start_time, end_time):
             count = count + 1
             #print user_id
             #print "tuduk", event_lon, event_lat, rp, checkIn_entry[3], checkIn_entry[2]
-            if user_id in cluster:
+            if user_id in cluster_ids:
                 users_set.add(user_id)
     print "check entries", count
     users_set = list(users_set)
     users_set.sort()
     return users_set
 
-def initial_propogation(event_lon, event_lat, start_time, end_time):
+def initial_propogation(event_lon, event_lat, start_time, end_time, cluster_set):
     global eventType, influenced_list, user_list
     global initPro, eR0
     eR0 = getInitInfReg()
@@ -193,14 +195,19 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
         users_region_list = get_initial_users(event_lon, event_lat, eR0, start_time, end_time)  #TODO improvement get stayTimeInRegion here only
         print 'offline initial users :: ', users_region_list
     if ONLINE_EVENT:
-        users_online_region_list = get_online_initial_users(start_time, end_time) #add parameter for cluster number later
+        if cluster_set is None:
+            print 'cluster_set cannot be None when ONLINE_EVENT is on.\n'
+            exit(1)
+        users_online_region_list = get_online_initial_users(0, 1, cluster_set) #add parameter for cluster number later
         print 'online initial users ::', users_online_region_list
         maxLogins = getMaxLogins(start_time, end_time)
         print 'maxLogins in range :: ', maxLogins
-
+    count = 0
     for user_id in users_online_region_list:
         numberOfLogins = getNumberOfLogins(start_time, end_time, user_id)
-        print 'number of Logins for ' + str(user_id) + ' is ' + str(numberOfLogins)
+        if numberOfLogins > 0:
+            count = count + 1
+        #print 'number of Logins for ' + str(user_id) + ' is ' + str(numberOfLogins)
         if NEG_INF:
             inf_prob = online_init_inf_prob(eventType, user_list[user_id]['interests_list'], numberOfLogins, maxLogins, user_list[user_id]['neg_interests_list'])
         else:
@@ -209,10 +216,10 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             #print "init_inf", inf_prob
             polarity = inf_prob/abs(inf_prob)
             inf_prob = abs(inf_prob)
-        print 'polarity for ' + str(user_id) + 'is :: ' + str(polarity)
-        print 'inf_prob for ' + str(user_id) + 'is :: ' + str(inf_prob)
+        #print 'polarity for ' + str(user_id) + 'is :: ' + str(polarity)
+        #print 'inf_prob for ' + str(user_id) + 'is :: ' + str(inf_prob)
         random_num = random.random() # between 0 to 1
-        print 'random number for ' + str(user_id) + 'is :: ' + str(random_num)
+        #print 'random number for ' + str(user_id) + 'is :: ' + str(random_num)
         if random_num <= inf_prob:
             user_list[user_id]['influenced_bit'] = polarity
             user_list[user_id]['time_of_influence'] = end_time
@@ -240,7 +247,7 @@ def initial_propogation(event_lon, event_lat, start_time, end_time):
             random_num = random.random()
             if random_num <= offline_share_prob:
                 user_list[user_id]['offline_shared'] = 1
-
+    print count
     for user_id in users_region_list:
         timeInRegion = stayTimeInRegion(event_lon, event_lat, eR0, e_t0, initPro, user_id)
         #print "user", user_id
@@ -453,9 +460,16 @@ def printNodes(influenced_list):
             negative_count = negative_count + 1
         elif polarity>0:
             positive_count = positive_count + 1
-    print "Positive Nodes: ", positive_count, ", Negative Nodes: ", negative_count
+    temp = 1
+    if temp == 1:
+        print str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count))
+        f = open('cluster_execution_results_jacc.txt', 'a')
+        f.write(str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count)) + '\n')
+        f.close()
+        return
+    return str('Positive Nodes: ' + str(positive_count) + ', Negative Nodes: ' + str(negative_count))
 
-def F(pos):
+def F(pos, cluster_set = None):
     random.seed(10)
     print "position", pos[0], pos[1]
     global influenced_list, checkIn_list, user_list, n_users
@@ -476,7 +490,7 @@ def F(pos):
     n_users = len(user_list)
     influenced_list = list()
     if initOn:
-        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro)
+        new_influenced = initial_propogation(pos[0], pos[1], e_t0, e_t0+initPro, cluster_set)
         printNodes(influenced_list)
     if new_influenced!=None:
         start_ind, end_ind = filter_checkInList(e_t0+initPro, e_t0+initPro+addPro)
@@ -484,12 +498,16 @@ def F(pos):
         #time.sleep(10)
         traverse()
     #print len(influenced_list)
-    printNodes(influenced_list)
-    return len(influenced_list)
+    return printNodes(influenced_list)
+    #return len(influenced_list)
 
 #start = time.clock()
+<<<<<<< HEAD
 F((0.09916773323165684, 0.3422742228921536))
 #initial_propogation(0,0.2,)
+=======
+#F((0.09916773323165684, 0.3422742228921536))
+>>>>>>> fd5cc3f72efd2b2d8f2b7ba9a0c1f96719d5faed
 #print time.clock() - start
 
 #for influenced_user in influenced_list:

@@ -489,6 +489,7 @@ def F(pos):
 
 #start = time.clock()
 F((0.09916773323165684, 0.3422742228921536))
+#initial_propogation(0,0.2,)
 #print time.clock() - start
 
 #for influenced_user in influenced_list:
